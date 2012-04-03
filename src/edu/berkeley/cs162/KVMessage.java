@@ -264,11 +264,14 @@ public class KVMessage{
 	
 	public Object deserializeValue(){
 		try {
-			ByteArrayInputStream x = new ByteArrayInputStream(value.getBytes());
-			ObjectInputStream in = new ObjectInputStream(x);
+			ByteArrayInputStream fileIn = new ByteArrayInputStream(value.getBytes());
+			if (value.getBytes().length > 131072) {
+				// TODO throw exception
+			}
+			ObjectInputStream in = new ObjectInputStream(fileIn);
 			Object rtn = in.readObject();
 			in.close();
-			x.close();
+			fileIn.close();
 			return rtn;
 		} catch (IOException i) {
 			i.printStackTrace();
