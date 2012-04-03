@@ -33,6 +33,26 @@ package edu.berkeley.cs162;
 import java.io.Serializable;
 import java.net.Socket;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+import org.w3c.dom.*;
+
+import javax.xml.parsers.*;
+
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
+
 
 /**
  * This class is used to communicate with (appropriately marshalling and unmarshalling) 
@@ -57,19 +77,78 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 	
 	@Override
 	public boolean put(K key, V value) throws KVException {
-		// implement me
-		return false;
+		try {
+			ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+			if (fileOut.size() > 256){
+				// TODO throw exception
+			}
+			String keyString = KVMessage.serialize(key);
+			String valueString = KVMessage.serialize(value);
+			
+			KVMessage message = new KVMessage("getreq", keyString, valueString);
+			String xmlFile = message.toXML();
+			Socket connection = new Socket(server, port);
+			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
+			out.println(xmlFile);
+			InputStream in = connection.getInputStream();
+			message = new KVMessage(in);
+			// in.msgType should be "resp"
+			if (message.getMessage().equals("Success")) return message.getStatus();
+			// TODO Error Message
+		} catch (UnknownHostException e) {
+			System.out.println("Unknown host: kq6py");
+			System.exit(1);
+		} catch (IOException e) {
+			System.out.println("No I/O");
+			System.exit(1);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public V get(K key) throws KVException {
-		// implement me
-		return null;
+		try {
+			String keyString = KVMessage.serialize(key);
+			KVMessage message = new KVMessage("getreq", keyString);
+			String xmlFile = message.toXML();
+			Socket connection = new Socket(server, port);
+			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
+			out.println(xmlFile);
+			InputStream in = connection.getInputStream();
+			message = new KVMessage(in);
+			// in.msgType should be "resp"
+			return (V)message.deserializeValue();
+		} catch (UnknownHostException e) {
+			System.out.println("Unknown host: kq6py");
+			System.exit(1);
+		} catch (IOException e) {
+			System.out.println("No I/O");
+			System.exit(1);
+		}
 	}
 
 	@Override
 	public void del(K key) throws KVException {
-		// implement me		
+		try {	
+			String keyString = KVMessage.serialize(key);
+			
+			KVMessage message = new KVMessage("delreq", keyString);
+			String xmlFile = message.toXML();
+			Socket connection = new Socket(server, port);
+			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
+			out.println(xmlFile);
+			InputStream in = connection.getInputStream();
+			message = new KVMessage(in);
+			// in.msgType should be "resp"
+			if (message.getMessage().equals("Success")) System.out.println(message.getMessage());
+			// TODO Error Message
+		} catch (UnknownHostException e) {
+			System.out.println("Unknown host: kq6py");
+			System.exit(1);
+		} catch (IOException e) {
+			System.out.println("No I/O");
+			System.exit(1);
+		}
+		
 	}
 }
