@@ -102,6 +102,8 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			System.out.println("No I/O");
 			System.exit(1);
 		}
+		// to make compiler happy
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -125,6 +127,8 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			System.out.println("No I/O");
 			System.exit(1);
 		}
+		// to make compiler happy
+		return null;
 	}
 
 	@Override
