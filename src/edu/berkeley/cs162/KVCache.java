@@ -28,6 +28,8 @@
 package edu.berkeley.cs162;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.Hashtable;
 
 /**
  * An LRU cache which has a fixed maximum number of elements (cacheSize).
@@ -35,6 +37,8 @@ import java.io.Serializable;
  */
 public class KVCache<K extends Serializable, V extends Serializable> implements KeyValueInterface<K, V>{
 	private int cacheSize;
+	private Hashtable cacheStructure;
+	private LinkedList<V> orderAccessed;
 
 	/**
 	 * Creates a new LRU cache.
@@ -42,6 +46,9 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public KVCache (int cacheSize) {
 		// implement me
+		this.cacheSize = cacheSize;
+		cacheStructure = new Hashtable();
+		orderAccessed = new LinkedList<V>();
 	}
 
 	/**
@@ -52,7 +59,13 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public V get (K key) {
 		// implement me
-		return null;
+		V tempValue = (V) cacheStructure.get(key);
+		if ( tempValue == null ) { return null; }
+		else {
+			orderAccessed.remove( tempValue );
+			orderAccessed.addFirst( tempValue );
+			return tempValue;
+		}
 	}
 
 	/**
@@ -66,6 +79,12 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public boolean put (K key, V value) {
 		// implement me
+		if (get(key) != null) { return true; }
+		if ( (orderAccessed.size() + 1) > cacheSize ) {
+			cacheStructure.remove( orderAccessed.removeLast() );
+		}
+		orderAccessed.addFirst( value );
+		cacheStructure.put( key, orderAccessed.getFirst());
 		return false;
 	}
 
@@ -75,5 +94,6 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public void del (K key) {
 		// implement me
+		cacheStructure.remove( cacheStructure.get(key) );
 	}
 } // end class LRUCache
