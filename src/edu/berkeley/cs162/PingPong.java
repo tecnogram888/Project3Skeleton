@@ -5,13 +5,13 @@ import java.util.*;
 
 public class PingPong {
 	
-	ServerSocket server;
-	public Socket client;
-	BufferedReader in;
-	String line;
-	PrintWriter out;
+	static ServerSocket server;
+	public static Socket client;
+	static BufferedReader in;
+	static String line;
+	static PrintWriter out;
 	
-	public void listenSocket() throws IOException {
+	public static void listenSocket() throws IOException {
 
 		//create new ServerSocket object
 	    try{
@@ -42,11 +42,18 @@ public class PingPong {
 	      try{
 	        line = in.readLine();
 	//Send data back to client
-	        out.println("pong");
+	        System.out.println("pong");
 	      } catch (IOException e) {
 	        System.out.println("Read failed");
 	        System.exit(-1);
 	      }
 	    }
 	  }
+	public static void main(String[] args) {
+		try {
+			listenSocket();
+		} catch (IOException e) {
+			System.out.println("BOOOO" + e);
+		}
+	}
 }
