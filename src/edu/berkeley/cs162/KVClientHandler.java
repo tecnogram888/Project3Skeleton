@@ -30,6 +30,8 @@
 package edu.berkeley.cs162;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.net.Socket;
 
@@ -57,11 +59,153 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 		threadpool = new ThreadPool(connections);	
 	}
 	
+	//Utility method, sends the KVMessage to the client Socket
+	public static void sendMessage(Socket client, KVMessage message){
+		PrintWriter out = null;
+		try {
+			out = new PrintWriter(client.getOutputStream(), true);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		out.println(message.toXML());
+	}
+	
 	/* (non-Javadoc)
 	 * @see edu.berkeley.cs162.NetworkHandler#handle(java.net.Socket)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void handle(Socket client) throws IOException {
-		// implement me
+		InputStream in = client.getInputStream();
+		KVMessage mess = null;
+		try {
+			mess = new KVMessage(in);
+		} catch (KVException e) {
+			KVClientHandler.sendMessage(client, e.getMsg());
+		}
+		if (mess.getMsgType().equals("getreq")){
+			try {
+				threadpool.addToQueue(new getRunnable<K,V>((K)mess.deserializeKey(), keyserver, client));
+			} catch (InterruptedException e) {
+				// TODO create new KVMessage with threadPool error and send back
+			}
+		}
+		else if (mess.getMsgType().equals("putreq")){
+			try {
+				threadpool.addToQueue(new putRunnable<K,V>((K)mess.deserializeKey(), (V) mess.deserializeValue(), keyserver, client));
+			} catch (InterruptedException e) {
+				// TODO create new KVMessage with threadPool error and send back
+			}
+			
+		}
+		else if (mess.getMsgType().equals("delreq")){
+			try {
+				threadpool.addToQueue(new delRunnable<K,V>((K)mess.deserializeKey(), keyserver, client));
+			} catch (InterruptedException e) {
+				// TODO create new KVMessage with threadPool error and send back
+			}
+			
+		}
+		else {
+			KVClientHandler.sendMessage(client, new KVMessage("Unknown Error: Unrecognized request type"));
+			
+		}
+		
 	}
+}
+
+
+class getRunnable<K extends Serializable, V extends Serializable> implements Runnable {
+	K key;
+	KeyServer<K, V> keyserver;
+	Socket client;
+
+	public getRunnable(K key, KeyServer<K,V> keyserver, Socket client){
+		this.key = key;
+		this.keyserver = keyserver;
+		this.client = client;
+	}
+	@Override
+	public void run() {
+		V value = null;
+		try {
+			value = keyserver.get(key);
+		} catch (KVException e) {
+			KVClientHandler.sendMessage(client, e.getMsg());
+		}
+		KVMessage message = new KVMessage("resp", KVMessage.serialize(key), KVMessage.serialize(value));
+		KVClientHandler.sendMessage(client, message);
+		try {
+			client.close();
+		} catch (IOException e) {
+			// TODO These ones don't send errors, this is a server error
+			e.printStackTrace();
+		}
+	}
+	
+}
+
+class putRunnable<K extends Serializable, V extends Serializable>implements Runnable {
+	K key;
+	V value;
+	KeyServer<K,V> keyserver;
+	Socket client;
+	
+	public putRunnable(K key, V value, KeyServer<K,V> keyserver, Socket client){
+		this.key = key;
+		this.value = value;
+		this.keyserver = keyserver;
+		this.client = client;
+	}
+	@Override
+	public void run() {
+		boolean b = false;
+		try {
+			b = keyserver.put(key, value);
+		} catch (KVException e) {
+			KVClientHandler.sendMessage(client, e.getMsg());
+		}
+		KVMessage message = new KVMessage(b, "Success");
+		KVClientHandler.sendMessage(client, message);
+		try {
+			client.close();
+		} catch (IOException e) {
+			// TODO These ones don't send errors, this is a server error
+			e.printStackTrace();
+		}
+		
+	}
+	
+}
+
+class delRunnable<K extends Serializable, V extends Serializable> implements Runnable {
+	K key;
+	KeyServer<K,V> keyserver;
+	Socket client;
+	
+	public delRunnable(K key, KeyServer<K,V> keyserver, Socket client){
+		this.key = key;
+		this.keyserver = keyserver;
+		this.client = client;
+	}
+	
+	@Override
+	public void run() {
+		try {
+			keyserver.del(key);
+		} catch (KVException e) {
+			KVClientHandler.sendMessage(client, e.getMsg());
+		}
+		KVMessage message = new KVMessage("Success");
+		KVClientHandler.sendMessage(client, message);
+		try {
+			client.close();
+		} catch (IOException e) {
+			// TODO These ones don't send errors, this is a server error
+			e.printStackTrace();
+		}
+		
+	}
+	
 }
