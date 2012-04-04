@@ -94,7 +94,12 @@ class WorkerThread extends Thread {
 				r = pool.tasks.poll();
 				r.run();
 			} else {
-				pool.wait();
+				try {
+					pool.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
