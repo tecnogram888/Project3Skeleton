@@ -77,7 +77,7 @@ public class KVMessage{
 		this.value = null;
 	}
 	
-	public String getMsg(){
+	public String getMsgType(){
 		return msgType;
 	}
 	
