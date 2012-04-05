@@ -11,6 +11,8 @@ public class PingPong {
 	static String line;
 	static PrintWriter out;
 	
+
+	
 	public static void listenSocket() throws IOException {
 
 		//create new ServerSocket object
@@ -22,6 +24,7 @@ public class PingPong {
 	    }
 
 	    //create new socket client
+	    while (true) {
 	    try{
 	      client = server.accept();
 	    } catch (IOException e) {
@@ -29,26 +32,14 @@ public class PingPong {
 	      System.exit(-1);
 	    }
 	    
-	    //new BufferedReader to read input, PrintWriter to write output
-	    try{
-	      in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-	      out = new PrintWriter(client.getOutputStream(), true); //do we need this?
-	    } catch (IOException e) {
-	      System.out.println("Accept failed: 8081");
-	      System.exit(-1);
+	    out = new PrintWriter(client.getOutputStream(), true);
+
+	    //Send data back to client
+	    out.println("pong");
+	    client.close();
 	    }
-	 
-	    while(true){
-	      try{
-	        line = in.readLine();
-	//Send data back to client
-	        System.out.println("pong");
-	      } catch (IOException e) {
-	        System.out.println("Read failed");
-	        System.exit(-1);
-	      }
-	    }
-	  }
+	}
+	
 	public static void main(String[] args) {
 		try {
 			listenSocket();
