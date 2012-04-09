@@ -29,7 +29,10 @@
  */
 package edu.berkeley.cs162;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.Hashtable;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This class defines the salve key value servers. Each individual KeyServer 
@@ -45,26 +48,66 @@ public class KeyServer<K extends Serializable, V extends Serializable> implement
 	private KVStore<K, V> dataStore = null;
 	private KVCache<K, V> dataCache = null;
 	
+	private Hashtable<K, ReentrantReadWriteLock> lockstore;
+	
 	/**
 	 * @param cacheSize number of entries in the data Cache.
 	 */
 	public KeyServer(int cacheSize) {
-		// implement me
+		dataStore = new KVStore<K, V>();
+		dataCache = new KVCache<K, V>(cacheSize);
+		lockstore = new Hashtable<K, ReentrantReadWriteLock>();
 	}
 	
 	public boolean put(K key, V value) throws KVException {
-		// implement me
-		return false;
+		if (lockstore.get(key) == null) lockstore.put(key, new ReentrantReadWriteLock());//This way, whatever method we call, if the lock does not exist it is created
+		
+		lockstore.get(key).writeLock().lock();
+		boolean ret = false;
+		ret = dataStore.put(key, value);//Access Store first so if an error is thrown, the Cache is not touched
+		dataCache.put(key, value);
+		lockstore.get(key).writeLock().unlock();	
+		
+		return ret;
 	}
 	
 	public V get (K key) throws KVException {
-		// implement me
-		return null;
+		if (lockstore.get(key) == null) lockstore.put(key, new ReentrantReadWriteLock());
+		
+		lockstore.get(key).readLock().lock();
+		V val = dataCache.get(key);
+		lockstore.get(key).readLock().unlock();
+		
+		if (val != null){
+			return val;
+		} else {
+			lockstore.get(key).readLock().lock();
+			val = dataStore.get(key);
+			lockstore.get(key).readLock().unlock();
+			if (val == null) {
+				throw new KVException(new KVMessage("Does not exist"));
+			}
+			lockstore.get(key).writeLock().lock();
+			dataCache.put(key, val);
+			lockstore.get(key).writeLock().unlock();
+		}
+		
+		return val;
 	}
 
 	@Override
 	public void del(K key) throws KVException {
-		// implement me		
+		if (lockstore.get(key) == null) lockstore.put(key, new ReentrantReadWriteLock());
+		
+		lockstore.get(key).readLock().lock();
+		if (dataCache.get(key) == null && dataStore.get(key) == null){
+			throw new KVException(new KVMessage("Does not exist"));
+		}
+		lockstore.get(key).readLock().unlock();
+		lockstore.get(key).writeLock().lock();
+		dataStore.del(key);//Access Store first so if an error is thrown, the Cache is not touched
+		dataCache.del(key);
+		lockstore.get(key).writeLock().unlock();
 	}
 }
 

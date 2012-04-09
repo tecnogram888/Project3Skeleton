@@ -50,7 +50,7 @@ public class SocketServer {
 	}
 	
 	public void connect() throws IOException {
-		// implement me
+		this.server = new ServerSocket(port);
 	}
 	
 	/**
@@ -58,7 +58,10 @@ public class SocketServer {
 	 * @throws IOException if there is a network error (for instance if the socket is inadvertently closed) 
 	 */
 	public void run() throws IOException {
-		// implement me
+		while(true){
+			Socket client = server.accept();
+			handler.handle(client);
+		}
 	}
 	
 	/** 
@@ -66,6 +69,6 @@ public class SocketServer {
 	 * @param handler is logic for servicing a network connection
 	 */
 	public void addHandler(NetworkHandler handler) {
-		// implement me
+		this.handler = handler;
 	}
 }

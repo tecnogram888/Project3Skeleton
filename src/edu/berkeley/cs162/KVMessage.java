@@ -76,6 +76,18 @@ public class KVMessage{
 		this.key = key;
 		this.value = null;
 	}
+	//For constructing error messages and successful delete messages
+	public KVMessage(String message){
+		this.msgType = "resp";
+		this.message = message;
+	}
+	
+	//For successful put message
+	public KVMessage(boolean status, String message){
+		this.status = status;
+		this.message = message;
+		this.msgType = "resp";
+	}
 	
 	public String getMsgType(){
 		return msgType;
@@ -265,6 +277,27 @@ public class KVMessage{
 	public Object deserializeValue(){
 		try {
 			ByteArrayInputStream fileIn = new ByteArrayInputStream(value.getBytes());
+			if (value.getBytes().length > 131072) {
+				// TODO throw exception
+			}
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			Object rtn = in.readObject();
+			in.close();
+			fileIn.close();
+			return rtn;
+		} catch (IOException i) {
+			i.printStackTrace();
+		} catch (ClassNotFoundException c) {
+			System.out.println("Object class not found");
+			c.printStackTrace();
+		}
+		// this is to make Eclipse happy
+		return null;
+	}
+	
+	public Object deserializeKey(){
+		try {
+			ByteArrayInputStream fileIn = new ByteArrayInputStream(key.getBytes());
 			if (value.getBytes().length > 131072) {
 				// TODO throw exception
 			}
