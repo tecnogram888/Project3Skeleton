@@ -29,6 +29,7 @@
  */
 package edu.berkeley.cs162;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -62,8 +63,14 @@ public class KeyServer<K extends Serializable, V extends Serializable> implement
 		lockstore.put(key, new ReentrantReadWriteLock());
 		
 		lockstore.get(key).writeLock().lock();
-		boolean ret = dataStore.put(key, value);
+		boolean ret = false;
 		dataCache.put(key, value);
+		try {
+		ret = dataStore.put(key, value);
+		} catch (KVException e) {//TODO Does not seem to throw IOExceptions... 
+			dataCache.del(key);
+			throw new KVException(new KVMessage("IO Error"));
+		}
 		lockstore.get(key).writeLock().unlock();	
 		
 		
