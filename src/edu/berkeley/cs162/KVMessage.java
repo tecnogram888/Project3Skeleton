@@ -79,6 +79,7 @@ public class KVMessage{
 		this.key = key;
 		this.value = null;
 	}
+	
 	//For constructing error messages and successful delete messages
 	public KVMessage(String message){
 		this.msgType = "resp";
