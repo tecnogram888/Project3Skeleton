@@ -79,7 +79,11 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public boolean put (K key, V value) {
 		// implement me
-		if (get(key) != null) { return true; }
+		if (get(key) != null) { 
+			if (get(key) == value) { return true; }
+			del(key);
+			put (key, value);
+		}
 		if ( (orderAccessed.size() + 1) > cacheSize ) {
 			cacheStructure.remove( orderAccessed.removeLast() );
 		}
