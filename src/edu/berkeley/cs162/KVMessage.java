@@ -34,12 +34,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.StringWriter;
 
 import org.w3c.dom.*;
 
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.xml.sax.SAXException;
@@ -255,36 +258,64 @@ public class KVMessage{
 		}
 		return rtn;
 	}
-	
-	public static String serialize(Object input) {
+	/**
+	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
+	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
+	 */
+	public static String marshall(Object input) {
 		try {
-			ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
-			if (fileOut.size() > 256) {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutput oout = new ObjectOutputStream(bos);
+			oout.writeObject(input);
+			byte[] inputByteArray = bos.toByteArray();
+			if (inputByteArray.length > 256) {
 				// TODO throw exception
 			}
-			ObjectOutputStream temp = new ObjectOutputStream(fileOut);
-			temp.writeObject(input);
-			String inputString = fileOut.toString();
-			temp.close();
-			fileOut.close();
-			return inputString;
+			
+			String marshalled = DatatypeConverter.printBase64Binary(inputByteArray);
+
+			oout.close();
+			bos.close();
+			return marshalled;
 		} catch (IOException i) {
 			i.printStackTrace();
 		}
 		return null;
 	}
 	
-	public Object deserializeValue(){
+	/**
+	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
+	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
+	 */
+	public Object unMarshallValue(){
 		try {
+			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(value);
+			if (unMarshalled.length > 131072) {
+				// TODO throw exception
+			}
+			
+			ByteArrayInputStream bis = new ByteArrayInputStream(unMarshalled);
+		    ObjectInput in = new ObjectInputStream(bis);
+		    Object deserialized = in.readObject();
+//		    System.out.println("u="+ deserialized);
+		    bis.close();
+		    in.close();
+		    return deserialized;
+			
+	/*		FileInputStream fileInputStream = new FileInputStream("foo.ser");
+			ObjectInputStream oInputStream = new ObjectInputStream(fileInputStream);
+			Object one = oInputStream.readObject();
+			
+			
 			ByteArrayInputStream fileIn = new ByteArrayInputStream(value.getBytes());
-			if (value.getBytes().length > 131072) {
+			if (unMarshalled.length > 131072) {
 				// TODO throw exception
 			}
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			Object rtn = in.readObject();
 			in.close();
 			fileIn.close();
-			return rtn;
+			return rtn;*/
 		} catch (IOException i) {
 			i.printStackTrace();
 		} catch (ClassNotFoundException c) {
@@ -315,4 +346,5 @@ public class KVMessage{
 		// this is to make Eclipse happy
 		return null;
 	}
+	
 }
