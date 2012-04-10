@@ -262,15 +262,16 @@ public class KVMessage{
 	/**
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
 	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
+	 * @throws KVException Over Sized Key
 	 */
-	public static String marshall(Object input) {
+	public static String marshall(Object input) throws KVException{
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutput oout = new ObjectOutputStream(bos);
 			oout.writeObject(input);
 			byte[] inputByteArray = bos.toByteArray();
 			if (inputByteArray.length > 256) {
-				// TODO throw exception
+				throw new KVException(new KVMessage ("Over sized key"));
 			}
 			
 			String marshalled = DatatypeConverter.printBase64Binary(inputByteArray);
@@ -287,12 +288,15 @@ public class KVMessage{
 	/**
 	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
+	 * @throws KVException Over Sized Value
 	 */
-	public Object unMarshallValue(){
+	public Object unMarshallValue() throws KVException{
 		try {
 			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(value);
-			if (unMarshalled.length > 131072) {
-				// TODO throw exception
+
+			// make sure the length of the byte array is less than 128KB
+			if (unMarshalled.length > 128 * java.lang.Math.pow(2,10)) {
+				throw new KVException(new KVMessage("Over sized value"));
 			}
 			
 			ByteArrayInputStream bis = new ByteArrayInputStream(unMarshalled);
