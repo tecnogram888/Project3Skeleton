@@ -89,6 +89,8 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 				threadpool.addToQueue(new getRunnable<K,V>((K)mess.unMarshallKey(), keyserver, client));
 			} catch (InterruptedException e) {
 				sendMessage(client, new KVMessage("Unknown Error: InterruptedException from the threadpool"));
+			} catch (KVException e){
+				sendMessage(client, e.getMsg());
 			}
 		}
 		else if (mess.getMsgType().equals("putreq")){
@@ -96,6 +98,8 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 				threadpool.addToQueue(new putRunnable<K,V>((K)mess.unMarshallKey(), (V) mess.unMarshallValue(), keyserver, client));
 			} catch (InterruptedException e) {
 				sendMessage(client, new KVMessage("Unknown Error: InterruptedException from the threadpool"));
+			} catch (KVException e){
+				sendMessage(client, e.getMsg());
 			}
 			
 		}
@@ -104,6 +108,8 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 				threadpool.addToQueue(new delRunnable<K,V>((K)mess.unMarshallKey(), keyserver, client));
 			} catch (InterruptedException e) {
 				sendMessage(client, new KVMessage("Unknown Error: InterruptedException from the threadpool"));
+			} catch (KVException e){
+				sendMessage(client, e.getMsg());
 			}
 			
 		}
@@ -134,7 +140,12 @@ class getRunnable<K extends Serializable, V extends Serializable> implements Run
 		} catch (KVException e) {
 			KVClientHandler.sendMessage(client, e.getMsg());
 		}
-		KVMessage message = new KVMessage("resp", KVMessage.marshall(key), KVMessage.marshall(value));
+		KVMessage message = null;
+		try {
+			message = new KVMessage("resp", KVMessage.marshall(key), KVMessage.marshall(value));
+		} catch (KVException e){
+			KVClientHandler.sendMessage(client, e.getMsg());
+		}
 		KVClientHandler.sendMessage(client, message);
 		try {
 			client.close();
