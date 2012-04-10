@@ -331,17 +331,42 @@ public class KVMessage{
 		return null;
 	}
 	
-	public Object deserializeKey(){
+	/**
+	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
+	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
+	 * @throws KVException Over Sized Value
+	 */
+	public Object unMarshallKey() throws KVException{
 		try {
-			ByteArrayInputStream fileIn = new ByteArrayInputStream(key.getBytes());
-			if (value.getBytes().length > 131072) {
+			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(key);
+
+			// make sure the length of the byte array is less than 128KB
+			if (unMarshalled.length > 256) {
+				throw new KVException(new KVMessage("Over sized value"));
+			}
+			
+			ByteArrayInputStream bis = new ByteArrayInputStream(unMarshalled);
+		    ObjectInput in = new ObjectInputStream(bis);
+		    Object deserialized = in.readObject();
+//		    System.out.println("u="+ deserialized);
+		    bis.close();
+		    in.close();
+		    return deserialized;
+			
+	/*		FileInputStream fileInputStream = new FileInputStream("foo.ser");
+			ObjectInputStream oInputStream = new ObjectInputStream(fileInputStream);
+			Object one = oInputStream.readObject();
+			
+			
+			ByteArrayInputStream fileIn = new ByteArrayInputStream(value.getBytes());
+			if (unMarshalled.length > 131072) {
 				// TODO throw exception
 			}
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			Object rtn = in.readObject();
 			in.close();
 			fileIn.close();
-			return rtn;
+			return rtn;*/
 		} catch (IOException i) {
 			i.printStackTrace();
 		} catch (ClassNotFoundException c) {
