@@ -28,7 +28,13 @@ public class KVMessageTest {
 	public void testSerialize() {
 		BasicAttribute keyTest = new BasicAttribute("key");
 		BasicAttribute valueTest = new BasicAttribute("value");
-		KVMessage test = new KVMessage("messageType", KVMessage.marshall(keyTest), KVMessage.marshall(valueTest));
+		KVMessage test = null;
+		try {
+			test = new KVMessage("messageType", KVMessage.marshall(keyTest), KVMessage.marshall(valueTest));
+		} catch (KVException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 //		System.out.println("msgType = " + test.getMsgType());
 //		System.out.println("key = " + test.getKey());
 //		System.out.println("value = " + test.getValue());
@@ -47,7 +53,7 @@ public class KVMessageTest {
 				+ "key" + "</key>\n<value>"
 				+ "value"
 				+ "</value>\n</KVMessage>\n";
-		System.out.println(x);
+		System.out.println(128 * java.lang.Math.pow(2,10));
 //		assertTrue(x.equals(xml));
 		assertEquals(x, xml);
 	}
