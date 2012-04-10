@@ -29,6 +29,7 @@
  */
 package edu.berkeley.cs162;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Hashtable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -59,18 +60,20 @@ public class KeyServer<K extends Serializable, V extends Serializable> implement
 	}
 	
 	public boolean put(K key, V value) throws KVException {
-		lockstore.put(key, new ReentrantReadWriteLock());
+		if (lockstore.get(key) == null) lockstore.put(key, new ReentrantReadWriteLock());//This way, whatever method we call, if the lock does not exist it is created
 		
 		lockstore.get(key).writeLock().lock();
-		boolean ret = dataStore.put(key, value);
+		boolean ret = false;
+		ret = dataStore.put(key, value);//Access Store first so if an error is thrown, the Cache is not touched
 		dataCache.put(key, value);
 		lockstore.get(key).writeLock().unlock();	
-		
 		
 		return ret;
 	}
 	
 	public V get (K key) throws KVException {
+		if (lockstore.get(key) == null) lockstore.put(key, new ReentrantReadWriteLock());
+		
 		lockstore.get(key).readLock().lock();
 		V val = dataCache.get(key);
 		lockstore.get(key).readLock().unlock();
@@ -94,14 +97,16 @@ public class KeyServer<K extends Serializable, V extends Serializable> implement
 
 	@Override
 	public void del(K key) throws KVException {
+		if (lockstore.get(key) == null) lockstore.put(key, new ReentrantReadWriteLock());
+		
 		lockstore.get(key).readLock().lock();
 		if (dataCache.get(key) == null && dataStore.get(key) == null){
 			throw new KVException(new KVMessage("Does not exist"));
 		}
 		lockstore.get(key).readLock().unlock();
 		lockstore.get(key).writeLock().lock();
+		dataStore.del(key);//Access Store first so if an error is thrown, the Cache is not touched
 		dataCache.del(key);
-		dataStore.del(key);
 		lockstore.get(key).writeLock().unlock();
 	}
 }
