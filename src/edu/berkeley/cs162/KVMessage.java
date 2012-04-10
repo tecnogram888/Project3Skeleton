@@ -79,6 +79,7 @@ public class KVMessage{
 		this.key = key;
 		this.value = null;
 	}
+	
 	//For constructing error messages and successful delete messages
 	public KVMessage(String message){
 		this.msgType = "resp";
@@ -261,15 +262,16 @@ public class KVMessage{
 	/**
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
 	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
+	 * @throws KVException Over Sized Key
 	 */
-	public static String marshall(Object input) {
+	public static String marshall(Object input) throws KVException{
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutput oout = new ObjectOutputStream(bos);
 			oout.writeObject(input);
 			byte[] inputByteArray = bos.toByteArray();
 			if (inputByteArray.length > 256) {
-				// TODO throw exception
+				throw new KVException(new KVMessage ("Over sized key"));
 			}
 			
 			String marshalled = DatatypeConverter.printBase64Binary(inputByteArray);
@@ -286,12 +288,15 @@ public class KVMessage{
 	/**
 	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
+	 * @throws KVException Over Sized Value
 	 */
-	public Object unMarshallValue(){
+	public Object unMarshallValue() throws KVException{
 		try {
 			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(value);
-			if (unMarshalled.length > 131072) {
-				// TODO throw exception
+
+			// make sure the length of the byte array is less than 128KB
+			if (unMarshalled.length > 128 * java.lang.Math.pow(2,10)) {
+				throw new KVException(new KVMessage("Over sized value"));
 			}
 			
 			ByteArrayInputStream bis = new ByteArrayInputStream(unMarshalled);
@@ -326,17 +331,42 @@ public class KVMessage{
 		return null;
 	}
 	
-	public Object deserializeKey(){
+	/**
+	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
+	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
+	 * @throws KVException Over Sized Value
+	 */
+	public Object unMarshallKey() throws KVException{
 		try {
-			ByteArrayInputStream fileIn = new ByteArrayInputStream(key.getBytes());
-			if (value.getBytes().length > 131072) {
+			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(key);
+
+			// make sure the length of the byte array is less than 128KB
+			if (unMarshalled.length > 256) {
+				throw new KVException(new KVMessage("Over sized value"));
+			}
+			
+			ByteArrayInputStream bis = new ByteArrayInputStream(unMarshalled);
+		    ObjectInput in = new ObjectInputStream(bis);
+		    Object deserialized = in.readObject();
+//		    System.out.println("u="+ deserialized);
+		    bis.close();
+		    in.close();
+		    return deserialized;
+			
+	/*		FileInputStream fileInputStream = new FileInputStream("foo.ser");
+			ObjectInputStream oInputStream = new ObjectInputStream(fileInputStream);
+			Object one = oInputStream.readObject();
+			
+			
+			ByteArrayInputStream fileIn = new ByteArrayInputStream(value.getBytes());
+			if (unMarshalled.length > 131072) {
 				// TODO throw exception
 			}
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 			Object rtn = in.readObject();
 			in.close();
 			fileIn.close();
-			return rtn;
+			return rtn;*/
 		} catch (IOException i) {
 			i.printStackTrace();
 		} catch (ClassNotFoundException c) {

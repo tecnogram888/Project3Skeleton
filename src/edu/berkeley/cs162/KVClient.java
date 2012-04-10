@@ -77,11 +77,6 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 		this.server = server;
 		this.port = port;
 	}
-
-	  public boolean doit(K key, V Value){
-		  System.out.println("hello");
-		  return false;
-	  }
 	
 	@Override
 	public boolean put(K key, V value) throws KVException {
@@ -97,11 +92,14 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			
 			KVMessage message = new KVMessage("getreq", keyString, valueString);
 			String xmlFile = message.toXML();
+			
 			Socket connection = new Socket(server, port);
 			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
 			out.println(xmlFile);
+			
 			InputStream in = connection.getInputStream();
 			in.close();
+			
 			message = new KVMessage(in);
 			// in.msgType should be "resp"
 			if (message.getMessage().equals("Success")) return message.getStatus();
