@@ -36,6 +36,7 @@ import java.net.Socket;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -44,6 +45,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 
 import org.w3c.dom.*;
 
@@ -74,16 +77,23 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 		this.server = server;
 		this.port = port;
 	}
+
+	  public boolean doit(K key, V Value){
+		  System.out.println("hello");
+		  return false;
+	  }
 	
 	@Override
 	public boolean put(K key, V value) throws KVException {
 		try {
+		    
 			ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+			
 			if (fileOut.size() > 256){
 				// TODO throw exception
 			}
-			String keyString = KVMessage.serialize(key);
-			String valueString = KVMessage.serialize(value);
+			String keyString = KVMessage.marshall(key);
+			String valueString = KVMessage.marshall(value);
 			
 			KVMessage message = new KVMessage("getreq", keyString, valueString);
 			String xmlFile = message.toXML();
@@ -91,6 +101,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
 			out.println(xmlFile);
 			InputStream in = connection.getInputStream();
+			in.close();
 			message = new KVMessage(in);
 			// in.msgType should be "resp"
 			if (message.getMessage().equals("Success")) return message.getStatus();
@@ -110,7 +121,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 	@Override
 	public V get(K key) throws KVException {
 		try {
-			String keyString = KVMessage.serialize(key);
+			String keyString = KVMessage.marshall(key);
 			KVMessage message = new KVMessage("getreq", keyString);
 			String xmlFile = message.toXML();
 			Socket connection = new Socket(server, port);
@@ -119,7 +130,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			InputStream in = connection.getInputStream();
 			message = new KVMessage(in);
 			// in.msgType should be "resp"
-			return (V)message.deserializeValue();
+			return (V)message.unMarshallValue();
 		} catch (UnknownHostException e) {
 			System.out.println("Unknown host: kq6py");
 			System.exit(1);
@@ -134,7 +145,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 	@Override
 	public void del(K key) throws KVException {
 		try {	
-			String keyString = KVMessage.serialize(key);
+			String keyString = KVMessage.marshall(key);
 			
 			KVMessage message = new KVMessage("delreq", keyString);
 			String xmlFile = message.toXML();

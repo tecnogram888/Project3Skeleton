@@ -28,11 +28,13 @@ public class KVMessageTest {
 	public void testSerialize() {
 		BasicAttribute keyTest = new BasicAttribute("key");
 		BasicAttribute valueTest = new BasicAttribute("value");
-		KVMessage test = new KVMessage("messageType", KVMessage.serialize(keyTest), KVMessage.serialize(valueTest));
-		System.out.println(test.getMsgType());
-		System.out.println(test.getKey());
-		System.out.println(test.getValue());
-		assertEquals(valueTest, test.deserializeValue());
+		KVMessage test = new KVMessage("messageType", KVMessage.marshall(keyTest), KVMessage.marshall(valueTest));
+		System.out.println("msgType = " + test.getMsgType());
+		System.out.println("key = " + test.getKey());
+		System.out.println("value = " + test.getValue());
+//		System.out.println(valueTest);
+//		System.out.println(test.unMarshallValue());
+		assertEquals(valueTest, test.unMarshallValue());
 	}
 
 }
