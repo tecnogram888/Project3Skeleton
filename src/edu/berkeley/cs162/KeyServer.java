@@ -79,6 +79,8 @@ public class KeyServer<K extends Serializable, V extends Serializable> implement
 		lockstore.get(key).readLock().unlock();
 		
 		if (val != null){
+			//This line of code is for testing only, it breaks most things
+			//System.out.println("Cache: " + val.toString() + " Store: " + dataStore.get(key).toString());
 			return val;
 		} else {
 			lockstore.get(key).readLock().lock();

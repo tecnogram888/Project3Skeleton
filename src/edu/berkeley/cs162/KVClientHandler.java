@@ -88,14 +88,14 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 			try {
 				threadpool.addToQueue(new getRunnable<K,V>((K)mess.deserializeKey(), keyserver, client));
 			} catch (InterruptedException e) {
-				// TODO create new KVMessage with threadPool error and send back
+				sendMessage(client, new KVMessage("Unknown Error: InterruptedException from the threadpool"));
 			}
 		}
 		else if (mess.getMsgType().equals("putreq")){
 			try {
 				threadpool.addToQueue(new putRunnable<K,V>((K)mess.deserializeKey(), (V) mess.deserializeValue(), keyserver, client));
 			} catch (InterruptedException e) {
-				// TODO create new KVMessage with threadPool error and send back
+				sendMessage(client, new KVMessage("Unknown Error: InterruptedException from the threadpool"));
 			}
 			
 		}
@@ -103,7 +103,7 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 			try {
 				threadpool.addToQueue(new delRunnable<K,V>((K)mess.deserializeKey(), keyserver, client));
 			} catch (InterruptedException e) {
-				// TODO create new KVMessage with threadPool error and send back
+				sendMessage(client, new KVMessage("Unknown Error: InterruptedException from the threadpool"));
 			}
 			
 		}

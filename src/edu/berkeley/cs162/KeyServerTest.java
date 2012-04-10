@@ -17,7 +17,6 @@ public class KeyServerTest {
 			
 			assertTrue(server.put("Test1", "Test5"));
 			
-			System.out.println(server.get("Test1"));
 			assertEquals(server.get("Test1"), "Test5");
 			
 			assertEquals(server.get("Test3"), "Test4");
