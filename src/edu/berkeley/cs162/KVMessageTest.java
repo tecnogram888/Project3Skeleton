@@ -16,6 +16,8 @@ public class KVMessageTest {
 		assertEquals(test.getValue(), "value");
 	}
 	
+	//TODO Doug! Do constructor tests!
+	
 	@Test
 	public void testConstructorTwoArguments() {
 		KVMessage test = new KVMessage("messageType", "key");
@@ -25,40 +27,67 @@ public class KVMessageTest {
 	}
 	
 	@Test
-	public void testSerialize() {
+	public void testMarshall() {
 		BasicAttribute keyTest = new BasicAttribute("key");
 		BasicAttribute valueTest = new BasicAttribute("value");
 		KVMessage test = null;
 		try {
 			test = new KVMessage("messageType", KVMessage.marshall(keyTest), KVMessage.marshall(valueTest));
 		} catch (KVException e) {
+			// Auto-fail if an exception is thrown
+			assertTrue(false);
 			e.printStackTrace();
 			System.exit(1);
 		}
 		try {
 			assertEquals(valueTest, test.unMarshallValue());
+			assertEquals(keyTest, test.unMarshallKey());
 		} catch (KVException e) {
-			// TODO Auto-generated catch block
+			// Auto-fail if an exception is thrown
+			assertTrue(false);
 			e.printStackTrace();
 			System.exit(1);
 		}
 	}
 	
 	@Test
-	public void testXMLParsing() {
-		BasicAttribute keyTest = new BasicAttribute("key");
-		BasicAttribute valueTest = new BasicAttribute("value");
+	public void testXMLParsing1() {
 		KVMessage test = new KVMessage("messageType", "key", "value");
 		String xml = test.toXML();
 		String x = "<KVMessage type=\"messageType\">\n<key>" 
 				+ "key" + "</key>\n<value>"
 				+ "value"
 				+ "</value>\n</KVMessage>\n";
-		System.out.println(128 * java.lang.Math.pow(2,10));
-//		assertTrue(x.equals(xml));
 		assertEquals(x, xml);
 	}
 	
-	
+	@Test
+	public void testXMLParsing2() {
+		BasicAttribute keyTest = new BasicAttribute("key");
+		BasicAttribute valueTest = new BasicAttribute("value");
+		KVMessage test = null;
+		try {
+			test = new KVMessage("messageType", KVMessage.marshall(keyTest), KVMessage.marshall(valueTest));
+		} catch (KVException e) {
+			// Auto-fail if an exception is thrown
+			assertTrue(false);
+			e.printStackTrace();
+			System.exit(1);
+		}
+		String xml = test.toXML();
+		String x = null;
+		try {
+			x = "<KVMessage type=\"messageType\">\n<key>" 
+					+ KVMessage.marshall(keyTest) + "</key>\n<value>"
+					+ KVMessage.marshall(valueTest)
+					+ "</value>\n</KVMessage>\n";
+		} catch (KVException e) {
+			// Auto-fail if an exception is thrown
+			assertTrue(false);
+			e.printStackTrace();
+			System.exit(1);
+		}
+		assertEquals(x, xml);
+	}
 
 }
