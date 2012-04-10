@@ -35,12 +35,13 @@ public class KVMessageTest {
 			e.printStackTrace();
 			System.exit(1);
 		}
-//		System.out.println("msgType = " + test.getMsgType());
-//		System.out.println("key = " + test.getKey());
-//		System.out.println("value = " + test.getValue());
-//		System.out.println(valueTest);
-//		System.out.println(test.unMarshallValue());
-		assertEquals(valueTest, test.unMarshallValue());
+		try {
+			assertEquals(valueTest, test.unMarshallValue());
+		} catch (KVException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 	
 	@Test
