@@ -29,12 +29,29 @@ public class KVMessageTest {
 		BasicAttribute keyTest = new BasicAttribute("key");
 		BasicAttribute valueTest = new BasicAttribute("value");
 		KVMessage test = new KVMessage("messageType", KVMessage.marshall(keyTest), KVMessage.marshall(valueTest));
-		System.out.println("msgType = " + test.getMsgType());
-		System.out.println("key = " + test.getKey());
-		System.out.println("value = " + test.getValue());
+//		System.out.println("msgType = " + test.getMsgType());
+//		System.out.println("key = " + test.getKey());
+//		System.out.println("value = " + test.getValue());
 //		System.out.println(valueTest);
 //		System.out.println(test.unMarshallValue());
 		assertEquals(valueTest, test.unMarshallValue());
 	}
+	
+	@Test
+	public void testXMLParsing() {
+		BasicAttribute keyTest = new BasicAttribute("key");
+		BasicAttribute valueTest = new BasicAttribute("value");
+		KVMessage test = new KVMessage("messageType", "key", "value");
+		String xml = test.toXML();
+		String x = "<KVMessage type=\"messageType\">\n<key>" 
+				+ "key" + "</key>\n<value>"
+				+ "value"
+				+ "</value>\n</KVMessage>\n";
+		System.out.println(x);
+//		assertTrue(x.equals(xml));
+		assertEquals(x, xml);
+	}
+	
+	
 
 }
