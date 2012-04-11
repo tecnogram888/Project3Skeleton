@@ -123,13 +123,13 @@ public class KVMessage{
 	    public void close() {} // ignore close
 	}
 	
-	private static String getTagValue(String sTag, Element eElement) {
-		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
-		
-		Node nValue = (Node) nlList.item(0);
-	 
-		return nValue.getNodeValue().trim();
-	  }
+	  private static String getTagValue(String sTag, Element eElement) {
+			NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
+		 
+		        Node nValue = (Node) nlList.item(0);
+		 
+			return nValue.getNodeValue();
+		  }
 	
 	/**
 	 * Sites used:
@@ -152,37 +152,51 @@ public class KVMessage{
 			Element typeElement = (Element) typeNode;
 
 			msgType = typeElement.getAttribute("type");
+			System.out.println("MsgType: "+msgType);
 			if (msgType == "resp"){ // KVMessage is an incoming response from the server
 				NodeList statusList = typeElement.getElementsByTagName("Status");
-				if (statusList.getLength() != 0){
-					Node statusNode = statusList.item(0);
+				if (statusList.getLength() != 0){ // some xmls don't have a Status field
+/*					Node statusNode = statusList.item(0);
 					if (statusNode.getNodeType() != Node.ELEMENT_NODE) {} // TODO throw an exception?
-					Element statusElement = (Element)statusList.item(0);
-					String temp = getTagValue("Status", statusElement);
+					Element statusElement = (Element)statusList.item(0);*/
+					String temp = getTagValue("Status", typeElement);
 					if (temp.equals("True")){ status = true;}
 					else{ status = false;}
 				}
+				message = getTagValue("Message", typeElement);
 
-				NodeList messageList = typeElement.getElementsByTagName("Message");
+/*				NodeList messageList = typeElement.getElementsByTagName("Message");
 				Node messageNode = messageList.item(0);
 				if (messageNode.getNodeType() != Node.ELEMENT_NODE){} // TODO throw an exception?
 				Element messageElement = (Element)messageList.item(0);
-				message = getTagValue("Message", messageElement);
+				message = getTagValue("Message", messageElement);*/
 
 				
 			} else { // KVMessage is an outgoing message to the server
-				NodeList keyList = typeElement.getElementsByTagName("Key");
+				key = getTagValue("Key", typeElement);
+				/*NodeList keyList = typeElement.getElementsByTagName("Key");
 				Node keyNode = keyList.item(0);
+				System.out.println("KeyNode.getChildNodes has length: " + keyNode.getChildNodes().getLength());
 				if (keyNode.getNodeType() != Node.ELEMENT_NODE) {} // TODO throw an exception?
 				Element keyElement = (Element)keyList.item(0);
-				key = getTagValue("Key", keyElement);
-
+				
+				NodeList nlList = keyElement.getChildNodes();
+				System.out.println("nlList has length: " + nlList.getLength());
+				
+				Node nValue = (Node) nlList.item(0);
+			 
+				key = nValue.getNodeValue().trim();
+				*/
+				System.out.println("Key: "+ key);
+				
 				NodeList valueList = typeElement.getElementsByTagName("Value");
 				if (valueList.getLength() != 0){
-					Node valueNode = valueList.item(0);
+					value = getTagValue("Value", typeElement);
+					System.out.println("Value: "+value);
+/*					Node valueNode = valueList.item(0);
 					if (valueNode.getNodeType() != Node.ELEMENT_NODE) {} // TODO throw an exception?
 					Element valueElement = (Element)valueList.item(0);
-					value = getTagValue("Value", valueElement);
+					value = getTagValue("Value", valueElement);*/
 				}
 			}
 	         
@@ -219,7 +233,7 @@ public class KVMessage{
             root.setAttribute("type", msgType);
 
             //create child element, add an attribute, and add to root
-            Element keyElement = doc.createElement("key");
+            Element keyElement = doc.createElement("Key");
             root.appendChild(keyElement);
 
             //add a text element to the child
@@ -228,7 +242,7 @@ public class KVMessage{
             
             if (value != null){
             	//create child element, add an attribute, and add to root
-                Element valueElement = doc.createElement("value");
+                Element valueElement = doc.createElement("Value");
                 root.appendChild(valueElement);
 
                 //add a text element to the child
