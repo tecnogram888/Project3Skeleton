@@ -36,6 +36,7 @@ import java.net.Socket;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,16 +93,17 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			
 			Socket connection = new Socket(server, port);
 			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
+			InputStream in = connection.getInputStream();
 			out.println(xmlFile);
-			// TODO Should we close the output stream here? (And in similar places)
-			// Luke: DONE
-			out.close();
+			connection.shutdownOutput();
+			message = new KVMessage(in);
 			
 			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
-			InputStream in = connection.getInputStream();
+
+			// TODO parser goes infinitely when you pass in to new KVMessage
 			in.close();
-			
-			message = new KVMessage(in);
+			out.close();
+			connection.close();
 			// message.msgType should be "resp"
 			if (message.getMsgType() != "resp") throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
 			if (message.getMessage().equals("Success")) return message.getStatus();
@@ -112,6 +114,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			System.exit(1);
 		} catch (IOException e) {
 			System.out.println("No I/O");
+			e.printStackTrace();
 			System.exit(1);
 		}
 		// to make compiler happy
@@ -127,16 +130,19 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			String xmlFile = message.toXML();
 			
 			Socket connection = new Socket(server, port);
+			
 			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
 			out.println(xmlFile);
-			out.close();
-			
-			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
+			connection.shutdownOutput();
+
 			InputStream in = connection.getInputStream();
-			in.close();
+			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
 			
 			message = new KVMessage(in);
 			if (message.getMsgType() != "resp") throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+			out.close();
+			in.close();
+			connection.close();
 			return (V)message.unMarshallValue();
 		} catch (UnknownHostException e) {
 			System.out.println("Unknown host: kq6py");
@@ -151,7 +157,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 
 	@Override
 	public void del(K key) throws KVException {
-		try {	
+		try {			
 			String keyString = KVMessage.marshall(key);
 			KVMessage message = new KVMessage("delreq", keyString);
 			String xmlFile = message.toXML();
@@ -159,13 +165,15 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			Socket connection = new Socket(server, port);
 			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
 			out.println(xmlFile);
-			out.close();
+			connection.shutdownOutput();
 			
 			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
 			InputStream in = connection.getInputStream();
-			in.close();
 			
 			message = new KVMessage(in);
+			out.close();
+			in.close();
+			connection.close();
 			if (message.getMsgType() != "resp") throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
 			if (message.getMessage().equals("Success")) System.out.println(message.getMessage());
 			else throw new KVException(new KVMessage(message.getMessage()));

@@ -198,6 +198,8 @@ public class KVMessage{
 					Element valueElement = (Element)valueList.item(0);
 					value = getTagValue("Value", valueElement);*/
 				}
+				
+				if (msgType == "putreq" && value == null) throw new KVException (new KVMessage("XML Eror: Received unparseable message"));
 			}
 	         
 		}catch (SAXParseException err) {
