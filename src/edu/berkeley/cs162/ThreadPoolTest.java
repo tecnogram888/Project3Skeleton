@@ -11,6 +11,9 @@ public class ThreadPoolTest {
 		int size = 10;
 		ThreadPool testPool = new ThreadPool(size);
 		assertEquals(testPool.threads.length, size);
+		for (int i = 0; i < size; i++){
+			assertFalse(testPool.threads[i] == null);
+		}
 	}
 	
 	// tests whether multiple adds occurs successfully

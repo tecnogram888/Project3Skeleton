@@ -37,8 +37,8 @@ import java.util.Hashtable;
  */
 public class KVCache<K extends Serializable, V extends Serializable> implements KeyValueInterface<K, V>{
 	private int cacheSize;
-	private Hashtable cacheStructure;
-	private LinkedList<V> orderAccessed;
+	private Hashtable<K, V> cacheStructure;
+	private LinkedList<K> orderAccessed;
 
 	/**
 	 * Creates a new LRU cache.
@@ -47,8 +47,8 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	public KVCache (int cacheSize) {
 		// implement me
 		this.cacheSize = cacheSize;
-		cacheStructure = new Hashtable();
-		orderAccessed = new LinkedList<V>();
+		cacheStructure = new Hashtable<K, V>();
+		orderAccessed = new LinkedList<K>();
 	}
 
 	/**
@@ -59,11 +59,11 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public V get (K key) {
 		// implement me
-		V tempValue = (V) cacheStructure.get(key);
+		V tempValue = cacheStructure.get(key);
 		if ( tempValue == null ) { return null; }
 		else {
-			orderAccessed.remove( tempValue );
-			orderAccessed.addFirst( tempValue );
+			orderAccessed.remove( key );
+			orderAccessed.addFirst( key );
 			return tempValue;
 		}
 	}
@@ -79,17 +79,18 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public boolean put (K key, V value) {
 		// implement me
+		boolean pre_exist = false;
 		if (get(key) != null) { 
 			if (get(key) == value) { return true; }
 			del(key);
-			put (key, value);
+			pre_exist = true;
 		}
 		if ( (orderAccessed.size() + 1) > cacheSize ) {
 			cacheStructure.remove( orderAccessed.removeLast() );
 		}
-		orderAccessed.addFirst( value );
-		cacheStructure.put( key, orderAccessed.getFirst());
-		return false;
+		orderAccessed.addFirst( key );
+		cacheStructure.put( key, value);
+		return pre_exist;
 	}
 
 	/**
@@ -98,6 +99,7 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public void del (K key) {
 		// implement me
-		cacheStructure.remove( cacheStructure.get(key) );
+		orderAccessed.remove( key );
+		cacheStructure.remove( key );
 	}
 } // end class LRUCache
