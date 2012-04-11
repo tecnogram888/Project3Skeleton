@@ -62,6 +62,8 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public V get (K key) {
 		// implement me
+		if (accessLocks.get(key) == null) { return null; }
+		
 		accessLocks.get(key).readLock().lock();
 		V tempValue = cacheStructure.get(key);
 		accessLocks.get(key).readLock().unlock();
@@ -101,7 +103,7 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 			return true;
 		}
 		if ( (orderAccessed.size() + 1) > cacheSize ) {
-			cacheStructure.remove( orderAccessed.removeLast() );
+			del( orderAccessed.removeLast() );
 		}
 		orderAccessed.addFirst( key );
 		cacheStructure.put( key, value);
@@ -115,6 +117,8 @@ public class KVCache<K extends Serializable, V extends Serializable> implements 
 	 */
 	public void del (K key) {
 		// implement me
+		if (accessLocks.get(key) == null) return;
+		
 		accessLocks.get(key).writeLock().lock();
 		orderAccessed.remove( key );
 		cacheStructure.remove( key );
