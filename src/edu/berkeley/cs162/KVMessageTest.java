@@ -54,7 +54,8 @@ public class KVMessageTest {
 	public void testXMLParsing1() {
 		KVMessage test = new KVMessage("messageType", "key", "value");
 		String xml = test.toXML();
-		String x = "<KVMessage type=\"messageType\">\n<Key>" 
+		String x = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
+				+ "<KVMessage type=\"messageType\">\n<Key>" 
 				+ "key" + "</Key>\n<Value>"
 				+ "value"
 				+ "</Value>\n</KVMessage>\n";
@@ -77,7 +78,8 @@ public class KVMessageTest {
 		String xml = test.toXML();
 		String x = null;
 		try {
-			x = "<KVMessage type=\"messageType\">\n<Key>" 
+			x = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
+					+ "<KVMessage type=\"messageType\">\n<Key>" 
 					+ KVMessage.marshall(keyTest) + "</Key>\n<Value>"
 					+ KVMessage.marshall(valueTest)
 					+ "</Value>\n</KVMessage>\n";

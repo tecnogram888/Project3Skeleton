@@ -263,10 +263,10 @@ public class KVMessage{
             DOMSource source = new DOMSource(doc);
             trans.transform(source, result);
             String xmlString = sw.toString();
-            rtn = xmlString;
+            rtn = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlString;
 
             //print xml
-            System.out.println("Here's the xml:\n\n" + xmlString);
+            System.out.println("Here's the xml:\n\n" + rtn);
             
 		}catch (Throwable t) {
 			t.printStackTrace ();
