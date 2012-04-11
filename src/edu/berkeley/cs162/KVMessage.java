@@ -150,7 +150,7 @@ public class KVMessage{
 			NodeList typeList = doc.getElementsByTagName("KVMessage");
 			Node typeNode = typeList.item(0);
 			Element typeElement = (Element) typeNode;
-			//TODO get the type
+
 			msgType = typeElement.getAttribute("type");
 			if (msgType == "resp"){ // KVMessage is an incoming response from the server
 				NodeList statusList = typeElement.getElementsByTagName("Status");
