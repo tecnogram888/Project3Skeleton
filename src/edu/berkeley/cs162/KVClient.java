@@ -78,6 +78,9 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 		this.port = port;
 	}
 	
+	//TODO Why have these methods been changed to throw KVException?
+	//I think we need to just handle KVException in the client since they won't make sense outside of it.
+	//This applies to all of the methods.
 	@Override
 	public boolean put(K key, V value) throws KVException {
 		try {
@@ -96,7 +99,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			Socket connection = new Socket(server, port);
 			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
 			out.println(xmlFile);
-			
+			//TODO Should we close the output stream here? (And in similar places)
 			InputStream in = connection.getInputStream();
 			in.close();
 			
@@ -156,8 +159,8 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			if (message.getMessage().equals("Success")) System.out.println(message.getMessage());
 			// TODO Error Message
 		} catch (UnknownHostException e) {
-			System.out.println("Unknown host: kq6py");
-			System.exit(1);
+			System.out.println("Unknown host: kq6py");//TODO Why are we printing this?
+			System.exit(1);//TODO Should we actually exit here? (And the other places we do this)
 		} catch (IOException e) {
 			System.out.println("No I/O");
 			System.exit(1);
