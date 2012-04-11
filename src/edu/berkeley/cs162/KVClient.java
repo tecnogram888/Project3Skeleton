@@ -111,7 +111,8 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			System.out.println("Unknown host: kq6py");
 			System.exit(1);
 		} catch (IOException e) {
-			System.out.println("No I/O");
+			e.printStackTrace();
+			System.out.println("No I/ODOUG");
 			System.exit(1);
 		}
 		// to make compiler happy

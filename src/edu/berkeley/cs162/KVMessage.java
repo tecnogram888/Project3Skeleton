@@ -125,7 +125,6 @@ public class KVMessage{
 	
 	private static String getTagValue(String sTag, Element eElement) {
 		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
-		
 		Node nValue = (Node) nlList.item(0);
 	 
 		return nValue.getNodeValue().trim();
@@ -148,6 +147,7 @@ public class KVMessage{
 	         
 			// messageList should be a NodeList with only ONE Node
 			NodeList typeList = doc.getElementsByTagName("KVMessage");
+			
 			Node typeNode = typeList.item(0);
 			Element typeElement = (Element) typeNode;
 
@@ -176,7 +176,6 @@ public class KVMessage{
 				if (keyNode.getNodeType() != Node.ELEMENT_NODE) {} // TODO throw an exception?
 				Element keyElement = (Element)keyList.item(0);
 				key = getTagValue("Key", keyElement);
-
 				NodeList valueList = typeElement.getElementsByTagName("Value");
 				if (valueList.getLength() != 0){
 					Node valueNode = valueList.item(0);
@@ -219,7 +218,7 @@ public class KVMessage{
             root.setAttribute("type", msgType);
 
             //create child element, add an attribute, and add to root
-            Element keyElement = doc.createElement("key");
+            Element keyElement = doc.createElement("Key");
             root.appendChild(keyElement);
 
             //add a text element to the child
@@ -228,7 +227,7 @@ public class KVMessage{
             
             if (value != null){
             	//create child element, add an attribute, and add to root
-                Element valueElement = doc.createElement("value");
+                Element valueElement = doc.createElement("Value");
                 root.appendChild(valueElement);
 
                 //add a text element to the child
@@ -257,7 +256,7 @@ public class KVMessage{
 		}catch (Throwable t) {
 			t.printStackTrace ();
 		}
-		return rtn;
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+rtn;
 	}
 	/**
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
