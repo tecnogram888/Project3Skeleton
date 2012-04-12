@@ -19,7 +19,7 @@ public class PingPong {
 	    try{
 	      server = new ServerSocket(8081); 
 	    } catch (IOException e) {
-	      System.out.println("Could not listen on port 4444");
+	      System.out.println("Could not listen on port 8081");
 	      System.exit(-1);
 	    }
 
