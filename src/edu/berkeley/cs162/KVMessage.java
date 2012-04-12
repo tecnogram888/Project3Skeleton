@@ -48,7 +48,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
@@ -199,7 +198,7 @@ public class KVMessage{
 					value = getTagValue("Value", typeElement);
 				}
 				
-				if (msgType == "putreq" && value == null) throw new KVException (new KVMessage("XML Eror: Received unparseable message"));
+				if (msgType == "putreq" && value == null) throw new KVException (new KVMessage("XML Error: Received unparseable message"));
 			}
 	         
 	
@@ -219,7 +218,6 @@ public class KVMessage{
 			try {
 				docBuilder = dbfac.newDocumentBuilder();
 			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
             Document doc = docBuilder.newDocument();
@@ -276,7 +274,6 @@ public class KVMessage{
 			try {
 				trans = transfac.newTransformer();
 			} catch (TransformerConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
             trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -289,7 +286,6 @@ public class KVMessage{
             try {
 				trans.transform(source, result);
 			} catch (TransformerException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
             String xmlString = sw.toString();
@@ -305,7 +301,7 @@ public class KVMessage{
 	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
 	 * @throws KVException Over Sized Key
 	 */
-	public static String marshall(Object input) throws KVException{
+	public static String serialize(Object input) throws KVException{
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutput oout = new ObjectOutputStream(bos);
@@ -326,7 +322,7 @@ public class KVMessage{
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
 	 * @throws KVException Over Sized Value
 	 */
-	public Object unMarshallValue() throws KVException{
+	public Object deserializeValue() throws KVException{
 		
 			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(value);
 
@@ -356,7 +352,7 @@ public class KVMessage{
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
 	 * @throws KVException Over Sized Value
 	 */
-	public Object unMarshallKey() throws KVException{
+	public Object deserializeKey() throws KVException{
 		try {
 			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(key);
 

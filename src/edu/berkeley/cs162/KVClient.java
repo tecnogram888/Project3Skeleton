@@ -71,8 +71,8 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 		if (value instanceof String) {
 			if( ((String) value).isEmpty()) throw new KVException(new KVMessage("Empty value"));
 		}
-		String keyString = KVMessage.marshall(key);
-		String valueString = KVMessage.marshall(value);
+		String keyString = KVMessage.serialize(key);
+		String valueString = KVMessage.serialize(value);
 		if (keyString.isEmpty()) throw new KVException(new KVMessage("Empty key"));
 		if (valueString.isEmpty()) throw new KVException(new KVMessage("Empty value"));
 
@@ -138,7 +138,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 	@Override
 	public V get(K key) throws KVException {
 		if (key == null) throw new KVException(new KVMessage("Unknonw Error: get was called with null argument"));
-		String keyString = KVMessage.marshall(key);
+		String keyString = KVMessage.serialize(key);
 		KVMessage message = new KVMessage("getreq", keyString);
 
 		message = sendRecieve(message);			
@@ -151,7 +151,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 		}
 		else {
 			if (message.getValue() == null) throw new KVException(new KVMessage("Unknown Error: Get received \"null\" in value in the response"));
-			return (V)message.unMarshallValue();
+			return (V)message.deserializeValue();
 		}
 
 	}
@@ -159,11 +159,10 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 	@Override
 	public void del(K key) throws KVException {	
 		if (key == null) throw new KVException(new KVMessage("Unknonw Error: del was called with null argument"));
-		String keyString = KVMessage.marshall(key);
+		String keyString = KVMessage.serialize(key);
 		KVMessage message = new KVMessage("delreq", keyString);
 		message = sendRecieve(message);
 		if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
-		//			if ("Does not exist".equals(message.getMessage())) System.out.println("Del: Does not exist");
 		if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
 
 
