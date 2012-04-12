@@ -65,6 +65,12 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 	public boolean put(K key, V value) throws KVException {
 		if (key == null) throw new KVException(new KVMessage("Empty key"));
 		if (value == null) throw new KVException(new KVMessage("Empty value"));
+		if (key instanceof String) {
+			if( ((String) key).isEmpty()) throw new KVException(new KVMessage("Empty key"));
+		}
+		if (value instanceof String) {
+			if( ((String) value).isEmpty()) throw new KVException(new KVMessage("Empty value"));
+		}
 		String keyString = KVMessage.marshall(key);
 		String valueString = KVMessage.marshall(value);
 		if (keyString.isEmpty()) throw new KVException(new KVMessage("Empty key"));
