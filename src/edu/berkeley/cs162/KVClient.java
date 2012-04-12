@@ -99,8 +99,8 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			in.close();
 			out.close();
 			connection.close();
-			// message.msgType should be "resp"
-//			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("<KVClient> Unknown Error: response xml not a response!!"));
+			// message.msgType should be "resp." If not, throw KVException
+			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
 			// If the message is not "Success," it'll have an error message inside the return xml
 			if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
 			
@@ -135,15 +135,19 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			InputStream in = connection.getInputStream();
 
 			message = new KVMessage(in);
-			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+			
 			out.close();
 			in.close();
 			connection.close();
+			
+			// message.msgType should be "resp." If not, throw KVException
+			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+			
 			if ("Does not exist".equals(message.getMessage())){
-				System.out.println("Get: Does not exist");
 				throw new KVException(new KVMessage(message.getMessage()));
 			}
 			else {
+				if (message.getValue() == null) throw new KVException(new KVMessage("Unknown Error: Get received \"null\" in value in the response"));
 				return (V)message.unMarshallValue();
 				}
 		} catch (UnknownHostException e) {
