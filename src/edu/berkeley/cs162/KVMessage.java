@@ -301,10 +301,6 @@ public class KVMessage{
 			ObjectOutput oout = new ObjectOutputStream(bos);
 			oout.writeObject(input);
 			byte[] inputByteArray = bos.toByteArray();
-			if (inputByteArray.length > 256) {
-				throw new KVException(new KVMessage ("Over sized key"));
-			}
-			
 			String marshalled = DatatypeConverter.printBase64Binary(inputByteArray);
 
 			oout.close();
