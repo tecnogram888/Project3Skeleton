@@ -144,10 +144,21 @@ public class KVMessage{
 	 * @param input
 	 */	
 	public KVMessage(InputStream input) throws KVException{
-		try{
 			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-			Document doc = docBuilder.parse(new NoCloseInputStream(input));
+			DocumentBuilder docBuilder;
+			try {
+				docBuilder = docBuilderFactory.newDocumentBuilder();
+			} catch (ParserConfigurationException e) {
+				throw new KVException(new KVMessage("Unknown Error: Invalid parser config"));
+			}
+			Document doc = null;
+			try {
+				doc = docBuilder.parse(new NoCloseInputStream(input));
+			} catch (SAXException e) {
+				throw new KVException(new KVMessage("XML Error: Received unparseable message"));
+			} catch (IOException e) {
+				throw new KVException(new KVMessage("XML Error: Received unparseable message"));
+			}
 			
 			doc.getDocumentElement().normalize();
 			
@@ -184,15 +195,7 @@ public class KVMessage{
 				if (msgType == "putreq" && value == null) throw new KVException (new KVMessage("XML Eror: Received unparseable message"));
 			}
 	         
-		}catch (SAXParseException err) {
-			System.out.println ("** Parsing error" + ", line " + err.getLineNumber () + ", uri " + err.getSystemId ());
-			System.out.println(" " + err.getMessage ());
-		}catch (SAXException e) {
-			Exception x = e.getException ();
-			((x == null) ? e : x).printStackTrace ();
-		}catch (Throwable t) {
-			t.printStackTrace ();
-		}
+	
 	}
 	
 	/**
@@ -307,9 +310,8 @@ public class KVMessage{
 			bos.close();
 			return marshalled;
 		} catch (IOException i) {
-			i.printStackTrace();
+			throw new KVException(new KVMessage("Unknown Error: Could not serialize object"));
 		}
-		return null;
 	}
 	
 	/**
@@ -318,7 +320,7 @@ public class KVMessage{
 	 * @throws KVException Over Sized Value
 	 */
 	public Object unMarshallValue() throws KVException{
-		try {
+		
 			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(value);
 
 			// make sure the length of the byte array is less than 128KB
@@ -327,20 +329,19 @@ public class KVMessage{
 			}
 			
 			ByteArrayInputStream bis = new ByteArrayInputStream(unMarshalled);
-		    ObjectInput in = new ObjectInputStream(bis);
+		    ObjectInput in;
+			try {
+				in = new ObjectInputStream(bis);
+			
 		    Object deserialized = in.readObject();
 		    bis.close();
 		    in.close();
 		    return deserialized;
-			
-		} catch (IOException i) {
-			i.printStackTrace();
-		} catch (ClassNotFoundException c) {
-			System.out.println("Object class not found");
-			c.printStackTrace();
-		}
-		// this is to make Eclipse happy
-		return null;
+			} catch (IOException e) {
+				throw new KVException(new KVMessage("Unknown Error: Could not deserialize value"));
+			} catch (ClassNotFoundException e) {
+				throw new KVException(new KVMessage("Unknown Error: Could not deserialize value"));
+			}
 	}
 	
 	/**
@@ -363,14 +364,11 @@ public class KVMessage{
 		    bis.close();
 		    in.close();
 		    return deserialized;
-		} catch (IOException i) {
-			i.printStackTrace();
-		} catch (ClassNotFoundException c) {
-			System.out.println("Object class not found");
-			c.printStackTrace();
+		} catch (IOException e) {
+			throw new KVException(new KVMessage("Unknown Error: Could not deserialize key"));
+		} catch (ClassNotFoundException e) {
+			throw new KVException(new KVMessage("Unknown Error: Could not deserialize key"));
 		}
-		// this is to make Eclipse happy
-		return null;
 	}
 	
 }
