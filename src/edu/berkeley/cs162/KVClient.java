@@ -67,6 +67,8 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 		if (value == null) throw new KVException(new KVMessage("Empty value"));
 		String keyString = KVMessage.marshall(key);
 		String valueString = KVMessage.marshall(value);
+		if (keyString.isEmpty()) throw new KVException(new KVMessage("Empty key"));
+		if (valueString.isEmpty()) throw new KVException(new KVMessage("Empty value"));
 
 		KVMessage message = new KVMessage("putreq", keyString, valueString);
 
