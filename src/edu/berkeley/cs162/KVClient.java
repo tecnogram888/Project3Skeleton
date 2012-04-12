@@ -51,7 +51,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 
 	private String server = null;
 	private int port = 0;
-	
+
 	/**
 	 * @param server is the DNS reference to the Key-Value server
 	 * @param port is the port on which the Key-Value server is listening
@@ -60,30 +60,32 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 		this.server = server;
 		this.port = port;
 	}
-	
+
 	@Override
 	public boolean put(K key, V value) throws KVException {
-			String keyString = KVMessage.marshall(key);
-			String valueString = KVMessage.marshall(value);
-			
-			KVMessage message = new KVMessage("putreq", keyString, valueString);
+		if (key == null) throw new KVException(new KVMessage("Empty key"));
+		if (value == null) throw new KVException(new KVMessage("Empty value"));
+		String keyString = KVMessage.marshall(key);
+		String valueString = KVMessage.marshall(value);
 
-			message = sendRecieve(message);
-	
-			// message.msgType should be "resp." If not, throw KVException
-			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+		KVMessage message = new KVMessage("putreq", keyString, valueString);
 
-			// If the message is not "Success," it'll have an error message inside the return xml
-			if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
-			
-			// return the boolean status
-			return message.getStatus();
+		message = sendRecieve(message);
+
+		// message.msgType should be "resp." If not, throw KVException
+		if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+
+		// If the message is not "Success," it'll have an error message inside the return xml
+		if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
+
+		// return the boolean status
+		return message.getStatus();
 	}
 
 	private KVMessage sendRecieve(KVMessage message) throws KVException {
 		String xmlFile = message.toXML();
-		
-		
+
+
 		Socket connection;
 		PrintWriter out = null;
 		InputStream in = null;
@@ -107,14 +109,14 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			throw new KVException(new KVMessage("Network Error: Could not send data"));
 		}
 		try {
-		in = connection.getInputStream();
-		message = new KVMessage(in);
-		in.close();
+			in = connection.getInputStream();
+			message = new KVMessage(in);
+			in.close();
 		} catch (IOException e) {
 			throw new KVException(new KVMessage("Network Error: Could not receive data"));
 		}
-		
-		
+
+
 		out.close();
 		try {
 			connection.close();
@@ -127,33 +129,35 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 	@SuppressWarnings("unchecked")
 	@Override
 	public V get(K key) throws KVException {
-			String keyString = KVMessage.marshall(key);
-			KVMessage message = new KVMessage("getreq", keyString);
+		if (key == null) throw new KVException(new KVMessage("Unknonw Error: get was called with null argument"));
+		String keyString = KVMessage.marshall(key);
+		KVMessage message = new KVMessage("getreq", keyString);
 
-			message = sendRecieve(message);			
+		message = sendRecieve(message);			
 
-			
-			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
-			
-			if ("Does not exist".equals(message.getMessage())){
-				throw new KVException(new KVMessage(message.getMessage()));
-			}
-			else {
-				if (message.getValue() == null) throw new KVException(new KVMessage("Unknown Error: Get received \"null\" in value in the response"));
-				return (V)message.unMarshallValue();
-				}
-		
+
+		if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+
+		if ("Does not exist".equals(message.getMessage())){
+			throw new KVException(new KVMessage(message.getMessage()));
+		}
+		else {
+			if (message.getValue() == null) throw new KVException(new KVMessage("Unknown Error: Get received \"null\" in value in the response"));
+			return (V)message.unMarshallValue();
+		}
+
 	}
 
 	@Override
-	public void del(K key) throws KVException {		
-			String keyString = KVMessage.marshall(key);
-			KVMessage message = new KVMessage("delreq", keyString);
-			message = sendRecieve(message);
-			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
-//			if ("Does not exist".equals(message.getMessage())) System.out.println("Del: Does not exist");
-			if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
-	
-		
+	public void del(K key) throws KVException {	
+		if (key == null) throw new KVException(new KVMessage("Unknonw Error: del was called with null argument"));
+		String keyString = KVMessage.marshall(key);
+		KVMessage message = new KVMessage("delreq", keyString);
+		message = sendRecieve(message);
+		if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+		//			if ("Does not exist".equals(message.getMessage())) System.out.println("Del: Does not exist");
+		if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
+
+
 	}
 }
