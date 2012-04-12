@@ -96,6 +96,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			InputStream in = connection.getInputStream();
 			out.println(xmlFile);
 			connection.shutdownOutput();
+			// TODO somehow, we need to wait here for the connection to finish...
 			message = new KVMessage(in);
 			
 			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
