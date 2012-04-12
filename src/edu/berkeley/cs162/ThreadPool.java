@@ -51,7 +51,7 @@ public class ThreadPool {
 		threads = new Thread[size];
 		for (int i=0;i<size;i++) {
 			threads[i] = new WorkerThread(this);
-			threads[i].run();
+			threads[i].start();
 		}
 	}
 
@@ -83,6 +83,7 @@ class WorkerThread extends Thread {
 	{
 		// implement me
 		pool = o;
+		
 	}
 
 	/**
@@ -90,6 +91,7 @@ class WorkerThread extends Thread {
 	 */
 	public void run()
 	{
+		System.out.println("DOUG");
 		// implement me
 		while (true){
 			if (!pool.tasks.isEmpty()) {
@@ -97,7 +99,9 @@ class WorkerThread extends Thread {
 				r.run();
 			} else {
 				try {
+					synchronized(pool){
 					pool.wait();
+					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
