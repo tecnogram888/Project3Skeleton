@@ -91,7 +91,6 @@ class WorkerThread extends Thread {
 	 */
 	public void run()
 	{
-		System.out.println("DOUG");
 		// implement me
 		while (true){
 			if (!pool.tasks.isEmpty()) {
