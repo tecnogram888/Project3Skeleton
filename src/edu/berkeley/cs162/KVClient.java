@@ -176,8 +176,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			in.close();
 			connection.close();
 			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
-			if (message.getMessage().equals("Success")) System.out.println(message.getMessage());
-			else throw new KVException(new KVMessage(message.getMessage()));
+			if (!message.getMessage().equals("Success")) throw new KVException(new KVMessage(message.getMessage()));
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			System.out.println("Unknown host: kq6py");//TODO Why are we printing this?
