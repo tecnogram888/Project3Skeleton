@@ -83,29 +83,39 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 	@SuppressWarnings("unchecked")
 	@Override
 	public void handle(Socket client) throws IOException {
+		System.out.println("Is closed at start of handle() " + client.isClosed());
 		InputStream in = client.getInputStream();
 		KVMessage mess = null;
+		System.out.println("Before creating the KVMessage " + client.isClosed());
 		try {
 			mess = new KVMessage(in);
 		} catch (KVException e) {
+			System.out.println("Reached KVException case");
 			KVClientHandler.sendMessage(client, e.getMsg());
+			return;
 		}
+		System.out.println("After creating the KVMessage " + client.isClosed());
 		if (mess.getMsgType().equals("getreq")){
 			try {
 				threadpool.addToQueue(new getRunnable<K,V>((K)mess.unMarshallKey(), keyserver, client));
 			} catch (InterruptedException e) {
 				sendMessage(client, new KVMessage("Unknown Error: InterruptedException from the threadpool"));
+				return;
 			} catch (KVException e){
 				sendMessage(client, e.getMsg());
+				return;
 			}
 		}
 		else if (mess.getMsgType().equals("putreq")){
+			System.out.println("Is closed at start of handle() getReq case " + client.isClosed());
 			try {
 				threadpool.addToQueue(new putRunnable<K,V>((K)mess.unMarshallKey(), (V) mess.unMarshallValue(), keyserver, client));
 			} catch (InterruptedException e) {
 				sendMessage(client, new KVMessage("Unknown Error: InterruptedException from the threadpool"));
+				return;
 			} catch (KVException e){
 				sendMessage(client, e.getMsg());
+				return;
 			}
 			
 		}
@@ -114,13 +124,16 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 				threadpool.addToQueue(new delRunnable<K,V>((K)mess.unMarshallKey(), keyserver, client));
 			} catch (InterruptedException e) {
 				sendMessage(client, new KVMessage("Unknown Error: InterruptedException from the threadpool"));
+				return;
 			} catch (KVException e){
 				sendMessage(client, e.getMsg());
+				return;
 			}
 			
 		}
 		else {
 			KVClientHandler.sendMessage(client, new KVMessage("Unknown Error: Unrecognized request type"));
+			return;
 			
 		}
 		

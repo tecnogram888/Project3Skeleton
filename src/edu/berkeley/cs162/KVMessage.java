@@ -147,7 +147,7 @@ public class KVMessage{
 		try{
 			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-			Document doc = docBuilder.parse(input);
+			Document doc = docBuilder.parse(new NoCloseInputStream(input));
 			
 			doc.getDocumentElement().normalize();
 			System.out.println ("Root element of the doc is " + doc.getDocumentElement().getNodeName());
