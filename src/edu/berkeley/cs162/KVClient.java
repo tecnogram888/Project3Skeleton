@@ -33,31 +33,11 @@ package edu.berkeley.cs162;
 import java.io.Serializable;
 import java.net.Socket;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.Socket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-
-import org.w3c.dom.*;
-
-import javax.xml.parsers.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
 
 
 /**
@@ -87,9 +67,12 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			String valueString = KVMessage.marshall(value);
 			
 			KVMessage message = new KVMessage("putreq", keyString, valueString);
+
 			message = sendRecieve(message);
-			// message.msgType should be "resp"
-//			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("<KVClient> Unknown Error: response xml not a response!!"));
+	
+			// message.msgType should be "resp." If not, throw KVException
+			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+
 			// If the message is not "Success," it'll have an error message inside the return xml
 			if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
 			
@@ -146,14 +129,17 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 	public V get(K key) throws KVException {
 			String keyString = KVMessage.marshall(key);
 			KVMessage message = new KVMessage("getreq", keyString);
+
 			message = sendRecieve(message);			
+
+			
 			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
 			
 			if ("Does not exist".equals(message.getMessage())){
-				System.out.println("Get: Does not exist");
 				throw new KVException(new KVMessage(message.getMessage()));
 			}
 			else {
+				if (message.getValue() == null) throw new KVException(new KVMessage("Unknown Error: Get received \"null\" in value in the response"));
 				return (V)message.unMarshallValue();
 				}
 		
