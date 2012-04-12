@@ -107,6 +107,13 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 			}
 		}
 		else if (mess.getMsgType().equals("putreq")){
+			if (mess.hasEmptyKey()) {
+				sendMessage(client, new KVMessage("Unknown Error: Empty Key"));
+			}
+			if (mess.hasEmptyValue()) {
+				sendMessage(client, new KVMessage("Unknown Error: Empty Value"));
+			}
+			
 			try {
 				threadpool.addToQueue(new putRunnable<K,V>((K)mess.unMarshallKey(), (V) mess.unMarshallValue(), keyserver, client));
 			} catch (InterruptedException e) {

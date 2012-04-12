@@ -117,6 +117,13 @@ public class KVMessage{
 		return message;
 	}
 	
+	public boolean hasEmptyKey(){
+		return (key == null | key.length() == 0 | key.isEmpty());
+	}
+	public boolean hasEmptyValue(){
+		return (value == null| value.length() == 0 | value.isEmpty());
+	}
+	
 	/* Hack for ensuring XML libraries does not close input stream by default.
 	 * Solution from http://weblogs.java.net/blog/kohsuke/archive/2005/07/socket_xml_pitf.html */
 	private class NoCloseInputStream extends FilterInputStream {
