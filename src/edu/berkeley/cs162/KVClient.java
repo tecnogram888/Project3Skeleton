@@ -144,7 +144,13 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			out.close();
 			in.close();
 			connection.close();
-			return (V)message.unMarshallValue();
+			if ("Does not exist".equals(message.getMessage())){
+				System.out.println("Get: Does not exist");
+				throw new KVException(new KVMessage(message.getMessage()));
+			}
+			else {
+				return (V)message.unMarshallValue();
+				}
 		} catch (UnknownHostException e) {
 			System.out.println("Unknown host: kq6py");
 			System.exit(1);
@@ -176,7 +182,8 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			in.close();
 			connection.close();
 			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
-			if (!message.getMessage().equals("Success")) throw new KVException(new KVMessage(message.getMessage()));
+			if ("Does not exist".equals(message.getMessage())) System.out.println("Del: Does not exist");
+			if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			System.out.println("Unknown host: kq6py");//TODO Why are we printing this?

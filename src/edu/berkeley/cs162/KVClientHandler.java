@@ -158,12 +158,14 @@ class getRunnable<K extends Serializable, V extends Serializable> implements Run
 			value = keyserver.get(key);
 		} catch (KVException e) {
 			KVClientHandler.sendMessage(client, e.getMsg());
+			return;
 		}
 		KVMessage message = null;
 		try {
 			message = new KVMessage("resp", KVMessage.marshall(key), KVMessage.marshall(value));
 		} catch (KVException e){
 			KVClientHandler.sendMessage(client, e.getMsg());
+			return;
 		}
 		KVClientHandler.sendMessage(client, message);
 		try {
@@ -195,6 +197,7 @@ class putRunnable<K extends Serializable, V extends Serializable>implements Runn
 			b = keyserver.put(key, value);
 		} catch (KVException e) {
 			KVClientHandler.sendMessage(client, e.getMsg());
+			return;
 		}
 		KVMessage message = new KVMessage(b, "Success");
 		KVClientHandler.sendMessage(client, message);
@@ -226,6 +229,7 @@ class delRunnable<K extends Serializable, V extends Serializable> implements Run
 			keyserver.del(key);
 		} catch (KVException e) {
 			KVClientHandler.sendMessage(client, e.getMsg());
+			return;
 		}
 		KVMessage message = new KVMessage("Success");
 		KVClientHandler.sendMessage(client, message);

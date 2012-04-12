@@ -8,6 +8,8 @@ public class Client {
 			client.put("Test1", "Test2");
 			System.out.println(client.get("Test1"));
 			client.del("Test1");
+//			System.out.println(client.get("Test2"));
+			client.del("Test3");
 			System.out.println("whoot");
 		} catch (KVException e) {
 			System.out.println(e.getMsg().getMessage());
