@@ -107,7 +107,6 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 			}
 		}
 		else if (mess.getMsgType().equals("putreq")){
-			System.out.println("Is closed at start of handle() getReq case " + client.isClosed());
 			try {
 				threadpool.addToQueue(new putRunnable<K,V>((K)mess.unMarshallKey(), (V) mess.unMarshallValue(), keyserver, client));
 			} catch (InterruptedException e) {
@@ -157,7 +156,7 @@ class getRunnable<K extends Serializable, V extends Serializable> implements Run
 		try {
 			value = keyserver.get(key);
 		} catch (KVException e) {
-			KVClientHandler.sendMessage(client, e.getMsg());
+			KVClientHandler.sendMessage(client, new KVMessage("IO Error"));
 			return;
 		}
 		KVMessage message = null;
@@ -196,7 +195,7 @@ class putRunnable<K extends Serializable, V extends Serializable>implements Runn
 		try {
 			b = keyserver.put(key, value);
 		} catch (KVException e) {
-			KVClientHandler.sendMessage(client, e.getMsg());
+			KVClientHandler.sendMessage(client, new KVMessage("IO Error"));
 			return;
 		}
 		KVMessage message = new KVMessage(b, "Success");
@@ -228,7 +227,7 @@ class delRunnable<K extends Serializable, V extends Serializable> implements Run
 		try {
 			keyserver.del(key);
 		} catch (KVException e) {
-			KVClientHandler.sendMessage(client, e.getMsg());
+			KVClientHandler.sendMessage(client, new KVMessage("IO Error"));
 			return;
 		}
 		KVMessage message = new KVMessage("Success");
