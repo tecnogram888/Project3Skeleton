@@ -7,8 +7,6 @@ public class PingPong {
 	
 	static ServerSocket server;
 	public static Socket client;
-	static BufferedReader in;
-	static String line;
 	static PrintWriter out;
 	
 
@@ -16,7 +14,7 @@ public class PingPong {
 	public static void listenSocket() throws IOException {
 
 		//create new ServerSocket object
-	    try{
+	    try{	
 	      server = new ServerSocket(8081); 
 	    } catch (IOException e) {
 	      System.out.println("Could not listen on port 8081");
