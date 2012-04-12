@@ -79,9 +79,6 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 		this.port = port;
 	}
 	
-	//TODO Why have these methods been changed to throw KVException?
-	//I think we need to just handle KVException in the client since they won't make sense outside of it.
-	//This applies to all of the methods.
 	@Override
 	public boolean put(K key, V value) throws KVException {
 		try {
@@ -98,18 +95,17 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			connection.shutdownOutput();
 
 			message = new KVMessage(in);
-			
-			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
 
-			// TODO parser goes infinitely when you pass in to new KVMessage
 			in.close();
 			out.close();
 			connection.close();
 			// message.msgType should be "resp"
-			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("<KVClient> Unknown Error: response xml not a response!!"));
-			if (message.getMessage().equals("Success")) return message.getStatus();
-			// If it's not "Success," it'll have the error message inside of the return xml
-			else throw new KVException(new KVMessage(message.getMessage()));
+//			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("<KVClient> Unknown Error: response xml not a response!!"));
+			// If the message is not "Success," it'll have an error message inside the return xml
+			if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
+			
+			// return the boolean status
+			return message.getStatus();
 		} catch (UnknownHostException e) {
 			System.out.println("Unknown host: kq6py");
 			System.exit(1);
@@ -137,8 +133,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			connection.shutdownOutput();
 
 			InputStream in = connection.getInputStream();
-			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
-			
+
 			message = new KVMessage(in);
 			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
 			out.close();
@@ -182,7 +177,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			in.close();
 			connection.close();
 			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
-			if ("Does not exist".equals(message.getMessage())) System.out.println("Del: Does not exist");
+//			if ("Does not exist".equals(message.getMessage())) System.out.println("Del: Does not exist");
 			if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
