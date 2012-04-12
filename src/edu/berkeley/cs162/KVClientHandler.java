@@ -59,7 +59,7 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 		threadpool = new ThreadPool(connections);	
 	}
 	
-	//Utility method, sends the KVMessage to the client Socket
+	//Utility method, sends the KVMessage to the client Socket and closes output on the socket
 	public static void sendMessage(Socket client, KVMessage message){
 		PrintWriter out = null;
 		try {
@@ -69,6 +69,11 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 			e.printStackTrace();
 		}
 		out.println(message.toXML());
+		try {
+			client.shutdownOutput();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/* (non-Javadoc)

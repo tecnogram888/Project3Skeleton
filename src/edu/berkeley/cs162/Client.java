@@ -6,6 +6,7 @@ public class Client {
 		try {
 			System.out.println("Put(\"Test1\", \"Test2\")");
 			client.put("Test1", "Test2");
+			System.out.println(client.get("Test1"));
 		} catch (KVException e) {
 			System.out.println(e.getMsg().getMessage());
 		}

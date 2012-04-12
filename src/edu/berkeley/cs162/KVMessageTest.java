@@ -54,10 +54,11 @@ public class KVMessageTest {
 	public void testXMLParsing1() {
 		KVMessage test = new KVMessage("messageType", "key", "value");
 		String xml = test.toXML();
-		String x = "<KVMessage type=\"messageType\">\n<key>" 
-				+ "key" + "</key>\n<value>"
+		String x = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
+				+ "<KVMessage type=\"messageType\">\n<Key>" 
+				+ "key" + "</Key>\n<Value>"
 				+ "value"
-				+ "</value>\n</KVMessage>\n";
+				+ "</Value>\n</KVMessage>\n";
 		assertEquals(x, xml);
 	}
 	
@@ -77,10 +78,11 @@ public class KVMessageTest {
 		String xml = test.toXML();
 		String x = null;
 		try {
-			x = "<KVMessage type=\"messageType\">\n<key>" 
-					+ KVMessage.marshall(keyTest) + "</key>\n<value>"
+			x = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
+					+ "<KVMessage type=\"messageType\">\n<Key>" 
+					+ KVMessage.marshall(keyTest) + "</Key>\n<Value>"
 					+ KVMessage.marshall(valueTest)
-					+ "</value>\n</KVMessage>\n";
+					+ "</Value>\n</KVMessage>\n";
 		} catch (KVException e) {
 			// Auto-fail if an exception is thrown
 			assertTrue(false);
