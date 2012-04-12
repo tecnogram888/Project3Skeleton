@@ -45,6 +45,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -81,24 +83,11 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 	
 	@Override
 	public boolean put(K key, V value) throws KVException {
-		try {
 			String keyString = KVMessage.marshall(key);
 			String valueString = KVMessage.marshall(value);
 			
 			KVMessage message = new KVMessage("putreq", keyString, valueString);
-			String xmlFile = message.toXML();
-			
-			Socket connection = new Socket(server, port);
-			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
-			InputStream in = connection.getInputStream();
-			out.println(xmlFile);
-			connection.shutdownOutput();
-
-			message = new KVMessage(in);
-
-			in.close();
-			out.close();
-			connection.close();
+			message = sendRecieve(message);
 			// message.msgType should be "resp"
 //			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("<KVClient> Unknown Error: response xml not a response!!"));
 			// If the message is not "Success," it'll have an error message inside the return xml
@@ -106,39 +95,60 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			
 			// return the boolean status
 			return message.getStatus();
+	}
+
+	private KVMessage sendRecieve(KVMessage message) throws KVException {
+		String xmlFile = message.toXML();
+		
+		
+		Socket connection;
+		PrintWriter out = null;
+		InputStream in = null;
+		try {
+			connection = new Socket(server, port);
 		} catch (UnknownHostException e) {
-			System.out.println("Unknown host: kq6py");
-			System.exit(1);
+			throw new KVException(new KVMessage("Network Error: Could not connect"));
 		} catch (IOException e) {
-			System.out.println("No I/O");
-			e.printStackTrace();
-			System.exit(1);
+			throw new KVException(new KVMessage("Network Error: Could not create socket"));
 		}
-		// to make compiler happy
-		return false;
+		try {
+			connection.setSoTimeout(15000);
+		} catch (SocketException e1) {
+			throw new KVException(new KVMessage("Unknown Error: Could net set Socket timeout"));
+		}
+		try {
+			out = new PrintWriter(connection.getOutputStream(),true);
+			out.println(xmlFile);
+			connection.shutdownOutput();
+		} catch (IOException e) {
+			throw new KVException(new KVMessage("Network Error: Could not send data"));
+		}
+		try {
+		in = connection.getInputStream();
+		message = new KVMessage(in);
+		in.close();
+		} catch (IOException e) {
+			throw new KVException(new KVMessage("Network Error: Could not receive data"));
+		}
+		
+		
+		out.close();
+		try {
+			connection.close();
+		} catch (IOException e) {
+			throw new KVException(new KVMessage("Unknown Error: Could not close socket"));
+		}
+		return message;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public V get(K key) throws KVException {
-		try {
 			String keyString = KVMessage.marshall(key);
 			KVMessage message = new KVMessage("getreq", keyString);
-			String xmlFile = message.toXML();
-			
-			Socket connection = new Socket(server, port);
-			
-			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
-			out.println(xmlFile);
-			connection.shutdownOutput();
-
-			InputStream in = connection.getInputStream();
-
-			message = new KVMessage(in);
+			message = sendRecieve(message);			
 			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
-			out.close();
-			in.close();
-			connection.close();
+			
 			if ("Does not exist".equals(message.getMessage())){
 				System.out.println("Get: Does not exist");
 				throw new KVException(new KVMessage(message.getMessage()));
@@ -146,48 +156,18 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			else {
 				return (V)message.unMarshallValue();
 				}
-		} catch (UnknownHostException e) {
-			System.out.println("Unknown host: kq6py");
-			System.exit(1);
-		} catch (IOException e) {
-			System.out.println("No I/O");
-			System.exit(1);
-		}
-		// to make compiler happy
-		return null;
+		
 	}
 
 	@Override
-	public void del(K key) throws KVException {
-		try {			
+	public void del(K key) throws KVException {		
 			String keyString = KVMessage.marshall(key);
 			KVMessage message = new KVMessage("delreq", keyString);
-			String xmlFile = message.toXML();
-			
-			Socket connection = new Socket(server, port);
-			PrintWriter out = new PrintWriter(connection.getOutputStream(),true);
-			out.println(xmlFile);
-			connection.shutdownOutput();
-			
-			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
-			InputStream in = connection.getInputStream();
-			
-			message = new KVMessage(in);
-			out.close();
-			in.close();
-			connection.close();
+			message = sendRecieve(message);
 			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
 //			if ("Does not exist".equals(message.getMessage())) System.out.println("Del: Does not exist");
 			if (!"Success".equals(message.getMessage())) throw new KVException(new KVMessage(message.getMessage()));
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			System.out.println("Unknown host: kq6py");//TODO Why are we printing this?
-			System.exit(1);//TODO Should we actually exit here? (And the other places we do this)
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("No I/O");
-			System.exit(1);
-		}
+	
 		
 	}
 }
