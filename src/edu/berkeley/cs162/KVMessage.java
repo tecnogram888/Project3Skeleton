@@ -275,7 +275,7 @@ public class KVMessage{
 		}catch (Throwable t) {
 			t.printStackTrace ();
 		}
-		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"+rtn;
+		return rtn;
 	}
 	/**
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
