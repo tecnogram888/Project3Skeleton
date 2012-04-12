@@ -150,8 +150,7 @@ public class KVMessage{
 			Document doc = docBuilder.parse(new NoCloseInputStream(input));
 			
 			doc.getDocumentElement().normalize();
-			System.out.println ("Root element of the doc is " + doc.getDocumentElement().getNodeName());
-	         
+			
 			// messageList should be a NodeList with only ONE Node
 			NodeList typeList = doc.getElementsByTagName("KVMessage");
 			
@@ -159,50 +158,27 @@ public class KVMessage{
 			Element typeElement = (Element) typeNode;
 
 			msgType = typeElement.getAttribute("type");
-			System.out.println("MsgType: "+msgType);
-			if (msgType == "resp"){ // KVMessage is an incoming response from the server
+			if (msgType.equals("resp")){ // KVMessage is an incoming response from the server
 				NodeList statusList = typeElement.getElementsByTagName("Status");
-				if (statusList.getLength() != 0){ // some xmls don't have a Status field
-/*					Node statusNode = statusList.item(0);
-					if (statusNode.getNodeType() != Node.ELEMENT_NODE) {} // TODO throw an exception?
-					Element statusElement = (Element)statusList.item(0);*/
+				if (statusList.getLength() != 0){ 
 					String temp = getTagValue("Status", typeElement);
 					if (temp.equals("True")){ status = true;}
 					else{ status = false;}
 				}
-				message = getTagValue("Message", typeElement);
-
-/*				NodeList messageList = typeElement.getElementsByTagName("Message");
-				Node messageNode = messageList.item(0);
-				if (messageNode.getNodeType() != Node.ELEMENT_NODE){} // TODO throw an exception?
-				Element messageElement = (Element)messageList.item(0);
-				message = getTagValue("Message", messageElement);*/
-
+				
+				NodeList messageList = typeElement.getElementsByTagName("Message");
+				if (messageList.getLength() != 0){ 
+					message = getTagValue("Message", typeElement);
+				} else{
+					key = getTagValue("Key", typeElement);
+					value = getTagValue("Value", typeElement);
+				}
 				
 			} else { // KVMessage is an outgoing message to the server
 				key = getTagValue("Key", typeElement);
-				/*NodeList keyList = typeElement.getElementsByTagName("Key");
-				Node keyNode = keyList.item(0);
-				System.out.println("KeyNode.getChildNodes has length: " + keyNode.getChildNodes().getLength());
-				if (keyNode.getNodeType() != Node.ELEMENT_NODE) {} // TODO throw an exception?
-				Element keyElement = (Element)keyList.item(0);
-				
-				NodeList nlList = keyElement.getChildNodes();
-				System.out.println("nlList has length: " + nlList.getLength());
-				
-				Node nValue = (Node) nlList.item(0);
-			 
-				key = nValue.getNodeValue().trim();
-				*/
-				System.out.println("Key: "+ key);
 				NodeList valueList = typeElement.getElementsByTagName("Value");
 				if (valueList.getLength() != 0){
 					value = getTagValue("Value", typeElement);
-					System.out.println("Value: "+value);
-/*					Node valueNode = valueList.item(0);
-					if (valueNode.getNodeType() != Node.ELEMENT_NODE) {} // TODO throw an exception?
-					Element valueElement = (Element)valueList.item(0);
-					value = getTagValue("Value", valueElement);*/
 				}
 				
 				if (msgType == "putreq" && value == null) throw new KVException (new KVMessage("XML Eror: Received unparseable message"));
@@ -310,7 +286,7 @@ public class KVMessage{
             rtn = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlString;
 
             //print xml
-            System.out.println("Here's the xml:\n\n" + rtn);
+            //System.out.println("Here's the xml:\n\n" + rtn);
 		return rtn;
 	}
 	
@@ -357,25 +333,10 @@ public class KVMessage{
 			ByteArrayInputStream bis = new ByteArrayInputStream(unMarshalled);
 		    ObjectInput in = new ObjectInputStream(bis);
 		    Object deserialized = in.readObject();
-//		    System.out.println("u="+ deserialized);
 		    bis.close();
 		    in.close();
 		    return deserialized;
 			
-	/*		FileInputStream fileInputStream = new FileInputStream("foo.ser");
-			ObjectInputStream oInputStream = new ObjectInputStream(fileInputStream);
-			Object one = oInputStream.readObject();
-			
-			
-			ByteArrayInputStream fileIn = new ByteArrayInputStream(value.getBytes());
-			if (unMarshalled.length > 131072) {
-				// TODO throw exception
-			}
-			ObjectInputStream in = new ObjectInputStream(fileIn);
-			Object rtn = in.readObject();
-			in.close();
-			fileIn.close();
-			return rtn;*/
 		} catch (IOException i) {
 			i.printStackTrace();
 		} catch (ClassNotFoundException c) {
@@ -403,25 +364,9 @@ public class KVMessage{
 			ByteArrayInputStream bis = new ByteArrayInputStream(unMarshalled);
 		    ObjectInput in = new ObjectInputStream(bis);
 		    Object deserialized = in.readObject();
-//		    System.out.println("u="+ deserialized);
 		    bis.close();
 		    in.close();
 		    return deserialized;
-			
-	/*		FileInputStream fileInputStream = new FileInputStream("foo.ser");
-			ObjectInputStream oInputStream = new ObjectInputStream(fileInputStream);
-			Object one = oInputStream.readObject();
-			
-			
-			ByteArrayInputStream fileIn = new ByteArrayInputStream(value.getBytes());
-			if (unMarshalled.length > 131072) {
-				// TODO throw exception
-			}
-			ObjectInputStream in = new ObjectInputStream(fileIn);
-			Object rtn = in.readObject();
-			in.close();
-			fileIn.close();
-			return rtn;*/
 		} catch (IOException i) {
 			i.printStackTrace();
 		} catch (ClassNotFoundException c) {

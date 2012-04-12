@@ -106,7 +106,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			out.close();
 			connection.close();
 			// message.msgType should be "resp"
-			if (message.getMsgType() != "resp") throw new KVException(new KVMessage("<KVClient> Unknown Error: response xml not a response!!"));
+			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("<KVClient> Unknown Error: response xml not a response!!"));
 			if (message.getMessage().equals("Success")) return message.getStatus();
 			// If it's not "Success," it'll have the error message inside of the return xml
 			else throw new KVException(new KVMessage(message.getMessage()));
@@ -140,7 +140,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
 			
 			message = new KVMessage(in);
-			if (message.getMsgType() != "resp") throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
 			out.close();
 			in.close();
 			connection.close();
@@ -175,7 +175,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			out.close();
 			in.close();
 			connection.close();
-			if (message.getMsgType() != "resp") throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+			if (!message.getMsgType().equals("resp")) throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
 			if (message.getMessage().equals("Success")) System.out.println(message.getMessage());
 			else throw new KVException(new KVMessage(message.getMessage()));
 		} catch (UnknownHostException e) {
