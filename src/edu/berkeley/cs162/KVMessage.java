@@ -45,6 +45,8 @@ import org.w3c.dom.*;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
@@ -64,6 +66,7 @@ public class KVMessage{
 	private String value = null;
 	private boolean status = false;
 	private String message = null;
+	private boolean isPutResp = false;
 
 	public KVMessage(String msgType, String key, String value) {
 		this.msgType = msgType;
@@ -91,6 +94,7 @@ public class KVMessage{
 		this.status = status;
 		this.message = message;
 		this.msgType = "resp";
+		this.isPutResp = true;
 	}
 	
 	public String getMsgType(){
@@ -221,12 +225,17 @@ public class KVMessage{
 	 */
 	public String toXML() {
 		String rtn = null;
-		try {
 			/////////////////////////////
             //Creating an empty XML Document
             //We need a Document
             DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+            DocumentBuilder docBuilder = null;
+			try {
+				docBuilder = dbfac.newDocumentBuilder();
+			} catch (ParserConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             Document doc = docBuilder.newDocument();
 
         	/////////////////////////////
@@ -235,15 +244,16 @@ public class KVMessage{
             Element root = doc.createElement("KVMessage");
             doc.appendChild(root);
             root.setAttribute("type", msgType);
-
-            //create child element, add an attribute, and add to root
-            Element keyElement = doc.createElement("Key");
-            root.appendChild(keyElement);
-
-            //add a text element to the child
-            text = doc.createTextNode(key);
-            keyElement.appendChild(text);
             
+
+            if (key != null){
+            	//create child element, add an attribute, and add to root
+            	Element keyElement = doc.createElement("Key");
+            	root.appendChild(keyElement);
+            	//add a text element to the child
+            	text = doc.createTextNode(key);
+            	keyElement.appendChild(text);
+            }
             if (value != null){
             	//create child element, add an attribute, and add to root
                 Element valueElement = doc.createElement("Value");
@@ -253,11 +263,36 @@ public class KVMessage{
                 text = doc.createTextNode(value);
                 valueElement.appendChild(text);
             }
+            if (isPutResp){
+            	//create child element, add an attribute, and add to root
+                Element valueElement = doc.createElement("Status");
+                root.appendChild(valueElement);
+
+                //add a text element to the child
+                if (status) text = doc.createTextNode("True");
+                else text = doc.createTextNode("False");
+                valueElement.appendChild(text);
+            }
+            if (message != null){
+            	//create child element, add an attribute, and add to root
+                Element valueElement = doc.createElement("Message");
+                root.appendChild(valueElement);
+
+                //add a text element to the child
+                text = doc.createTextNode(message);
+                valueElement.appendChild(text);
+            }
             /////////////////////////////
             //Output the XML
             //set up a transformer
             TransformerFactory transfac = TransformerFactory.newInstance();
-            Transformer trans = transfac.newTransformer();
+            Transformer trans = null;
+			try {
+				trans = transfac.newTransformer();
+			} catch (TransformerConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             trans.setOutputProperty(OutputKeys.INDENT, "yes");
 
@@ -265,18 +300,20 @@ public class KVMessage{
             StringWriter sw = new StringWriter();
             StreamResult result = new StreamResult(sw);
             DOMSource source = new DOMSource(doc);
-            trans.transform(source, result);
+            try {
+				trans.transform(source, result);
+			} catch (TransformerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             String xmlString = sw.toString();
             rtn = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlString;
 
             //print xml
             System.out.println("Here's the xml:\n\n" + rtn);
-            
-		}catch (Throwable t) {
-			t.printStackTrace ();
-		}
 		return rtn;
 	}
+	
 	/**
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
 	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java

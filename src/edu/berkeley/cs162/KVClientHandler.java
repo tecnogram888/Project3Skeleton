@@ -68,7 +68,6 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(message.toXML());
 		out.println(message.toXML());
 		try {
 			client.shutdownOutput();

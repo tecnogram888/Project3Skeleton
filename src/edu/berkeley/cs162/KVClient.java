@@ -96,7 +96,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			InputStream in = connection.getInputStream();
 			out.println(xmlFile);
 			connection.shutdownOutput();
-			// TODO somehow, we need to wait here for the connection to finish...
+
 			message = new KVMessage(in);
 			
 			// TODO Is this the way to close it, as Prashanth said during Design Doc Review? 
@@ -106,7 +106,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			out.close();
 			connection.close();
 			// message.msgType should be "resp"
-			if (message.getMsgType() != "resp") throw new KVException(new KVMessage("Unknown Error: response xml not a response!!"));
+			if (message.getMsgType() != "resp") throw new KVException(new KVMessage("<KVClient> Unknown Error: response xml not a response!!"));
 			if (message.getMessage().equals("Success")) return message.getStatus();
 			// If it's not "Success," it'll have the error message inside of the return xml
 			else throw new KVException(new KVMessage(message.getMessage()));
