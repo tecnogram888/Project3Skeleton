@@ -105,7 +105,7 @@ public class KVClient<K extends Serializable, V extends Serializable> implements
 			throw new KVException(new KVMessage("Network Error: Could not create socket"));
 		}
 		try {
-			connection.setSoTimeout(100000);
+			connection.setSoTimeout(20000);
 		} catch (SocketException e1) {
 			throw new KVException(new KVMessage("Unknown Error: Could net set Socket timeout"));
 		}
