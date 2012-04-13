@@ -2,7 +2,7 @@ package edu.berkeley.cs162;
 
 public class ClientAlone {
 	public static void main(String[] args){
-		KVClient<String, String> client = new KVClient<String, String>("localhost", 8080);
+		KVClient<String, String> client = Client.initClient();
 		while (true){
 			try {
 				System.out.println("Should be False: " + client.put("test1", "Test2"));

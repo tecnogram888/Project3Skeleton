@@ -1,8 +1,16 @@
 package edu.berkeley.cs162;
 
 public class Client {
+	
+	public static final String addr = "localhost";
+	public static final int portNum = 8080;
+	
+	public static KVClient<String, String> initClient (){
+		return new KVClient<String, String>(addr, portNum);
+	}
+	
 	public static void main(String[] args){
-		KVClient<String, String> client = new KVClient<String, String>("localhost", 8080);
+		KVClient<String, String> client = initClient();
 		try {
 			int i = 0;
 			while (true) {

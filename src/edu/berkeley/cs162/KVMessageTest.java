@@ -2,6 +2,13 @@ package edu.berkeley.cs162;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
 import javax.naming.directory.BasicAttribute;
 
 import org.junit.Test;
@@ -77,16 +84,13 @@ public class KVMessageTest {
 		try {
 			test = new KVMessage("messageType", KVMessage.serialize(keyTest), KVMessage.serialize(valueTest));
 		} catch (KVException e) {
-			// Auto-fail if an exception is thrown
-			assertTrue(false);
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		String xml = null;
 		try {
 			xml = test.toXML();
 		} catch (KVException e) {
-			// should NOT ever throw exception here
 			e.printStackTrace();
 			fail();
 		}
@@ -98,12 +102,9 @@ public class KVMessageTest {
 					+ KVMessage.serialize(valueTest)
 					+ "</Value>\n</KVMessage>\n";
 		} catch (KVException e) {
-			// Auto-fail if an exception is thrown
-			assertTrue(false);
 			e.printStackTrace();
-			System.exit(1);
+			fail();
 		}
 		assertEquals(x, xml);
 	}
-
 }

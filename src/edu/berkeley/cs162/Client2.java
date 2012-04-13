@@ -2,7 +2,7 @@ package edu.berkeley.cs162;
 
 public class Client2 {
 	public static void main(String[] args){
-		KVClient<String, String> client = new KVClient<String, String>("localhost", 8080);
+		KVClient<String, String> client = Client.initClient();
 		while (true){
 			try {
 				System.out.println("Should be Equal to \"Test2\": " + client.get("Test1"));
