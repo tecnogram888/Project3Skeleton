@@ -67,7 +67,7 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 		try {
 			out = new PrintWriter(client.getOutputStream(), true);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		try {
@@ -172,8 +172,6 @@ class getRunnable<K extends Serializable, V extends Serializable> implements Run
 			value = keyserver.get(key);
 		} catch (KVException e) {
 			KVClientHandler.sendMessage(client, e.getMsg());
-			// TODO Changed by luke
-			// KVClientHandler.sendMessage(client, new KVMessage("IO Error"));
 			return;
 		}
 		KVMessage message = null;
@@ -187,7 +185,7 @@ class getRunnable<K extends Serializable, V extends Serializable> implements Run
 		try {
 			client.close();
 		} catch (IOException e) {
-			// TODO These ones don't send errors, this is a server error
+			// These ones don't send errors, this is a server error
 			e.printStackTrace();
 		}
 	}
@@ -213,8 +211,6 @@ class putRunnable<K extends Serializable, V extends Serializable>implements Runn
 			b = keyserver.put(key, value);
 		} catch (KVException e) {
 			KVClientHandler.sendMessage(client, e.getMsg());
-			// TODO Changed by luke
-			// KVClientHandler.sendMessage(client, new KVMessage("IO Error"));
 			return;
 		}
 		KVMessage message = new KVMessage(b, "Success");
@@ -222,7 +218,7 @@ class putRunnable<K extends Serializable, V extends Serializable>implements Runn
 		try {
 			client.close();
 		} catch (IOException e) {
-			// TODO These ones don't send errors, this is a server error
+			// These ones don't send errors, this is a server error
 			e.printStackTrace();
 		}
 		
@@ -252,8 +248,6 @@ class delRunnable<K extends Serializable, V extends Serializable> implements Run
 			} catch (IOException e2) {
 				e2.printStackTrace();
 			}
-			// TODO Changed by luke
-			// KVClientHandler.sendMessage(client, new KVMessage("IO Error"));
 			return;
 		}
 		KVMessage message = new KVMessage("Success");
@@ -261,7 +255,7 @@ class delRunnable<K extends Serializable, V extends Serializable> implements Run
 		try {
 			client.close();
 		} catch (IOException e) {
-			// TODO These ones don't send errors, this is a server error
+			// These ones don't send errors, this is a server error
 			e.printStackTrace();
 		}
 		

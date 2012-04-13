@@ -71,7 +71,7 @@ public class KVStore<K extends Serializable, V extends Serializable> implements 
 		try {
 			Thread.sleep(SLEEP_TIME);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
