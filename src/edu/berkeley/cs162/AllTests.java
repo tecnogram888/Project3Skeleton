@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ KeyServerTest.class, KVCacheTest.class, KVMessageTest.class,
-		ThreadPoolTest.class })
+		ThreadPoolTest.class, TestStorage.class })
 public class AllTests {
 
 }

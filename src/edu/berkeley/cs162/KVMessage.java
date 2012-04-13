@@ -163,6 +163,7 @@ public class KVMessage{
 			} catch (SAXException e) {
 				throw new KVException(new KVMessage("XML Error: Received unparseable message"));
 			} catch (IOException e) {
+				e.printStackTrace();
 				throw new KVException(new KVMessage("XML Error: Received unparseable message"));
 			}
 			
