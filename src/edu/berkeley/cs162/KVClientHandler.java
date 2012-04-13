@@ -247,6 +247,11 @@ class delRunnable<K extends Serializable, V extends Serializable> implements Run
 			keyserver.del(key);
 		} catch (KVException e) {
 			KVClientHandler.sendMessage(client, e.getMsg());
+			try {
+				client.close();
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
 			// TODO Changed by luke
 			// KVClientHandler.sendMessage(client, new KVMessage("IO Error"));
 			return;

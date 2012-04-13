@@ -72,6 +72,7 @@ public class TestStorage {
 	public void testPutDelDel() {
 		for (int i = 0; i < 3; i++){
 			try{
+				System.out.println(i);
 				assertFalse(client.put("Test1", "Test2"));
 				assertTrue(client.put("Test1", "Test3"));
 				client.del("Test1");
