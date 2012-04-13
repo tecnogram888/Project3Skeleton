@@ -53,7 +53,14 @@ public class KVMessageTest {
 	@Test
 	public void testXMLParsing1() {
 		KVMessage test = new KVMessage("messageType", "key", "value");
-		String xml = test.toXML();
+		String xml = null;
+		try {
+			xml = test.toXML();
+		} catch (KVException e) {
+			// should NOT ever throw exception here
+			e.printStackTrace();
+			fail();
+		}
 		String x = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
 				+ "<KVMessage type=\"messageType\">\n<Key>" 
 				+ "key" + "</Key>\n<Value>"
@@ -75,7 +82,14 @@ public class KVMessageTest {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		String xml = test.toXML();
+		String xml = null;
+		try {
+			xml = test.toXML();
+		} catch (KVException e) {
+			// should NOT ever throw exception here
+			e.printStackTrace();
+			fail();
+		}
 		String x = null;
 		try {
 			x = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 

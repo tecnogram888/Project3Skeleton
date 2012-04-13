@@ -29,6 +29,8 @@
  */
 package edu.berkeley.cs162;
 
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -68,7 +70,13 @@ public class KVClientHandler<K extends Serializable, V extends Serializable> imp
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		out.println(message.toXML());
+		try {
+			out.println(message.toXML());
+		} catch (KVException e) {
+			// should NOT ever throw exception here
+			e.printStackTrace();
+			fail();
+		}
 		try {
 			client.shutdownOutput();
 		} catch (IOException e) {

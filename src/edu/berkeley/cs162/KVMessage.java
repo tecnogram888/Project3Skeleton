@@ -209,7 +209,7 @@ public class KVMessage{
 	 * Generate the XML representation for this message.
 	 * @return the XML String
 	 */
-	public String toXML() {
+	public String toXML() throws KVException{
 		String rtn = null;
 			/////////////////////////////
             //Creating an empty XML Document
@@ -220,6 +220,7 @@ public class KVMessage{
 				docBuilder = dbfac.newDocumentBuilder();
 			} catch (ParserConfigurationException e) {
 				e.printStackTrace();
+				throw new KVException(new KVMessage("Unknown Error: Error occured duringf XML creation"));
 			}
             Document doc = docBuilder.newDocument();
 
@@ -276,6 +277,7 @@ public class KVMessage{
 				trans = transfac.newTransformer();
 			} catch (TransformerConfigurationException e) {
 				e.printStackTrace();
+				throw new KVException(new KVMessage("Unknown Error: Error occured duringf XML creation"));
 			}
             trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             trans.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -288,6 +290,7 @@ public class KVMessage{
 				trans.transform(source, result);
 			} catch (TransformerException e) {
 				e.printStackTrace();
+				throw new KVException(new KVMessage("Unknown Error: Error occured duringf XML creation"));
 			}
             String xmlString = sw.toString();
             rtn = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + xmlString;
