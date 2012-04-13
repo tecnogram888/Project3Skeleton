@@ -64,7 +64,11 @@ public class KeyServer<K extends Serializable, V extends Serializable> implement
 		
 		lockstore.get(key).writeLock().lock();
 		boolean ret = false;
+		try{
 		ret = dataStore.put(key, value);//Access Store first so if an error is thrown, the Cache is not touched
+		} catch (KVException e){
+			throw new KVException(new KVMessage("IO Error"));
+		}
 		dataCache.put(key, value);
 		lockstore.get(key).writeLock().unlock();	
 		
@@ -84,7 +88,11 @@ public class KeyServer<K extends Serializable, V extends Serializable> implement
 			return val;
 		} else {
 			lockstore.get(key).readLock().lock();
+			try {
 			val = dataStore.get(key);
+			} catch (KVException e){
+				throw new KVException(new KVMessage("IO Error"));
+			}
 			lockstore.get(key).readLock().unlock();
 			if (val == null) {
 				throw new KVException(new KVMessage("Does not exist"));
@@ -102,12 +110,20 @@ public class KeyServer<K extends Serializable, V extends Serializable> implement
 		if (lockstore.get(key) == null) lockstore.put(key, new ReentrantReadWriteLock());
 		
 		lockstore.get(key).readLock().lock();
-		if (dataCache.get(key) == null && dataStore.get(key) == null){
+		try {
+		if (dataCache.get(key) == null && dataCache.get(key) == null){
 			throw new KVException(new KVMessage("Does not exist"));
+		}
+		} catch (KVException e){
+			throw new KVException(new KVMessage("IO Error"));
 		}
 		lockstore.get(key).readLock().unlock();
 		lockstore.get(key).writeLock().lock();
+		try {
 		dataStore.del(key);//Access Store first so if an error is thrown, the Cache is not touched
+		} catch (KVException e){
+			throw new KVException(new KVMessage("IO Error"));
+		}
 		dataCache.del(key);
 		lockstore.get(key).writeLock().unlock();
 	}
