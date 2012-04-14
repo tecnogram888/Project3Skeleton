@@ -34,6 +34,53 @@ public class KVMessageTest {
 	}
 	
 	@Test
+	public void testConstructorOneArgument() {
+		KVMessage test = new KVMessage("messageError");
+		assertEquals(test.getMsgType(), "resp");
+		assertEquals(test.getKey(), null);
+		assertEquals(test.getValue(), null);
+		assertEquals(test.getMessage(), "messageError");
+	}
+	
+	@Test
+	public void testConstructorBoolString() {
+		KVMessage test = new KVMessage(true,"messageError");
+		assertEquals(test.getMsgType(), "resp");
+		assertEquals(test.getKey(), null);
+		assertEquals(test.getValue(), null);
+		assertEquals(test.getMessage(), "messageError");
+		try {
+			String message = test.toXML();
+			String x = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
+					+ "<KVMessage type=\"resp\">\n<Status>True</Status>\n<Message>" 
+					+ "messageError" + "</Message>\n</KVMessage>\n";
+			assertEquals(x, message);
+		} catch (KVException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
+	public void testConstructorBoolString2() {
+		KVMessage test = new KVMessage(false,"LukeIsAwesome");
+		assertEquals(test.getMsgType(), "resp");
+		assertEquals(test.getKey(), null);
+		assertEquals(test.getValue(), null);
+		assertEquals(test.getMessage(), "LukeIsAwesome");
+		try {
+			String message = test.toXML();
+			String x = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
+					+ "<KVMessage type=\"resp\">\n<Status>False</Status>\n<Message>" 
+					+ "LukeIsAwesome" + "</Message>\n</KVMessage>\n";
+			assertEquals(x, message);
+		} catch (KVException e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+	
+	@Test
 	public void testMarshall() {
 		BasicAttribute keyTest = new BasicAttribute("key");
 		BasicAttribute valueTest = new BasicAttribute("value");
