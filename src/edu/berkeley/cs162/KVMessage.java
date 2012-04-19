@@ -305,7 +305,7 @@ public class KVMessage{
 	 * http://stackoverflow.com/questions/20778/how-do-you-convert-binary-data-to-strings-and-back-in-java
 	 * @throws KVException Over Sized Key
 	 */
-	public static String serialize(Object input) throws KVException{
+	public static String encodeObject(Object input) throws KVException{
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutput oout = new ObjectOutputStream(bos);
@@ -326,7 +326,7 @@ public class KVMessage{
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
 	 * @throws KVException Over Sized Value
 	 */
-	public Object deserializeValue() throws KVException{
+	public Object decodeValue() throws KVException{
 		
 			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(value);
 
@@ -356,7 +356,7 @@ public class KVMessage{
 	 * http://stackoverflow.com/questions/2836646/java-serializable-object-to-byte-array
 	 * @throws KVException Over Sized Value
 	 */
-	public Object deserializeKey() throws KVException{
+	public Object decodeKey() throws KVException{
 		try {
 			byte[] unMarshalled = DatatypeConverter.parseBase64Binary(key);
 

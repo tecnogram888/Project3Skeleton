@@ -86,7 +86,7 @@ public class KVMessageTest {
 		BasicAttribute valueTest = new BasicAttribute("value");
 		KVMessage test = null;
 		try {
-			test = new KVMessage("messageType", KVMessage.serialize(keyTest), KVMessage.serialize(valueTest));
+			test = new KVMessage("messageType", KVMessage.encodeObject(keyTest), KVMessage.encodeObject(valueTest));
 		} catch (KVException e) {
 			// Auto-fail if an exception is thrown
 			assertTrue(false);
@@ -94,8 +94,8 @@ public class KVMessageTest {
 			System.exit(1);
 		}
 		try {
-			assertEquals(valueTest, test.deserializeValue());
-			assertEquals(keyTest, test.deserializeKey());
+			assertEquals(valueTest, test.decodeValue());
+			assertEquals(keyTest, test.decodeKey());
 		} catch (KVException e) {
 			// Auto-fail if an exception is thrown
 			assertTrue(false);
@@ -129,7 +129,7 @@ public class KVMessageTest {
 		BasicAttribute valueTest = new BasicAttribute("value");
 		KVMessage test = null;
 		try {
-			test = new KVMessage("messageType", KVMessage.serialize(keyTest), KVMessage.serialize(valueTest));
+			test = new KVMessage("messageType", KVMessage.encodeObject(keyTest), KVMessage.encodeObject(valueTest));
 		} catch (KVException e) {
 			e.printStackTrace();
 			fail();
@@ -145,8 +145,8 @@ public class KVMessageTest {
 		try {
 			x = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" 
 					+ "<KVMessage type=\"messageType\">\n<Key>" 
-					+ KVMessage.serialize(keyTest) + "</Key>\n<Value>"
-					+ KVMessage.serialize(valueTest)
+					+ KVMessage.encodeObject(keyTest) + "</Key>\n<Value>"
+					+ KVMessage.encodeObject(valueTest)
 					+ "</Value>\n</KVMessage>\n";
 		} catch (KVException e) {
 			e.printStackTrace();
