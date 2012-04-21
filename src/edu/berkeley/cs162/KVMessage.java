@@ -134,15 +134,23 @@ public class KVMessage{
 	}
 	
 
-	  private static String getTagValue(String sTag, Element eElement) {
-			NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
-		 
-		        Node nValue = (Node) nlList.item(0);
-		 
-			return nValue.getNodeValue();
-		  }
+	private static String getTagValue(String sTag, Element eElement) {
+		NodeList nlList = eElement.getElementsByTagName(sTag).item(0).getChildNodes();
 
-	
+		Node nValue = (Node) nlList.item(0);
+
+		return nValue.getNodeValue();
+	}
+
+	public String getElementsTag (String tag, Element x){
+		NodeList nodeList = x.getElementsByTagName(tag);
+		if (nodeList.getLength() != 0){ 
+			return getTagValue(tag, x);
+		} else {
+			return null;
+		}
+	}
+
 	/**
 	 * Sites used:
 	 * http://www.developerfusion.com/code/2064/a-simple-way-to-read-an-xml-file-in-java/
@@ -176,7 +184,18 @@ public class KVMessage{
 			Element typeElement = (Element) typeNode;
 
 			msgType = typeElement.getAttribute("type");
-			if (msgType.equals("resp")){ // KVMessage is an incoming response from the server
+			
+			key = getElementsTag("Key", typeElement);
+			
+			value = getElementsTag("Value", typeElement);
+			
+			String temp = getElementsTag("Status", typeElement);
+			if ("True".equals(temp)) status = true;
+			else if ("False".equals(temp)) status = false;
+	
+			message = getElementsTag("Message", typeElement);
+			
+			/*if (msgType.equals("resp")){ // KVMessage is an incoming response from the server
 				NodeList statusList = typeElement.getElementsByTagName("Status");
 				if (statusList.getLength() != 0){ 
 					String temp = getTagValue("Status", typeElement);
@@ -197,12 +216,10 @@ public class KVMessage{
 				NodeList valueList = typeElement.getElementsByTagName("Value");
 				if (valueList.getLength() != 0){
 					value = getTagValue("Value", typeElement);
-				}
+				}*/
 				
 				if (msgType == "putreq" && value == null) throw new KVException (new KVMessage("XML Error: Received unparseable message"));
-			}
 	         
-	
 	}
 	
 	/**
